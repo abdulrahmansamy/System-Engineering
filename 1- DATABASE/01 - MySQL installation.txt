@@ -3,6 +3,7 @@ MySQL Installation
 
 1- Install and Secure MySQL
 ---------------------------
+https://dev.mysql.com/doc/mysql-yum-repo-quick-guide/en/
 
 curl -sLO https://dev.mysql.com/get/mysql80-community-release-fc37-1.noarch.rpm	## for fedora 37
 
@@ -23,13 +24,14 @@ systemctl enable mysqld --now
 
 systemctl status mysqld
 
-
+/*
 sudo grep 'temporary password' /var/log/mysqld.log
-
 mysql -uroot -p
-
 ALTER USER 'root'@'localhost' IDENTIFIED BY '1234@Pass';
+*/
 
+mysql -uroot --password=$(sudo grep 'temporary password' /var/log/mysqld.log | awk -F ' '  '{print $(13)}') -e 'ALTER USER "root"@"localhost" IDENTIFIED BY "1234@Pass";' --connect-expired-password
+mysql -uroot -p1234@Pass -e 'SHOW DATABASES;'
 
 cat << EOF >> ~/.mylogin.cnf
 [client]
@@ -78,6 +80,7 @@ EOF
 
 firewall-cmd --permanent --add-service=mysql 
 firewall-cmd --reload 
+
 
 3- Master Master Configuration
 ------------------------------
