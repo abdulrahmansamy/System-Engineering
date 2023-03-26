@@ -4,18 +4,11 @@ MySQL Installation
 1- Install and Secure MySQL
 ---------------------------
 
-cat << EOF >> /etc/hosts
-
-172.16.42.145	db01.mysql.cluster	db01
-172.16.42.147	db02.mysql.cluster	db02
-EOF
-
 curl -sLO https://dev.mysql.com/get/mysql80-community-release-fc37-1.noarch.rpm	## for fedora 37
 
 curl -sLO https://dev.mysql.com/get/mysql80-community-release-el7-7.noarch.rpm	 ## for centos 7
 
 sudo rpm -Uvh  mysql80-community-release-fc37-1.noarch.rpm 
-
 
 yum repolist all | grep mysql
 
@@ -24,22 +17,14 @@ yum repolist enabled | grep mysql
 
 sudo yum module -y disable mysql
 
-
 sudo yum install -y mysql-community-server
-
 
 systemctl enable mysqld --now
 
-
 systemctl status mysqld
-
-firewall-cmd --permanent --add-service=mysql 
-firewall-cmd --reload 
 
 
 sudo grep 'temporary password' /var/log/mysqld.log
-
-
 
 mysql -uroot -p
 
@@ -60,7 +45,22 @@ GRANT ALL PRIVILEGES ON *.* TO 'replica'@'%';
  WITH GRANT OPTION;
 */
 
-2- Master Master Configuration
+
+2- Prepration For MySQL Clustering
+----------------------------------
+
+hostnamectl set-hostname db01.cluster02.mysql
+
+cat << EOF >> /etc/hosts
+
+172.16.42.148	db01.cluster01.mysql	db01
+172.16.42.149	db02.cluster01.mysql	db02
+EOF
+
+firewall-cmd --permanent --add-service=mysql 
+firewall-cmd --reload 
+
+3- Master Master Configuration
 ------------------------------
 
 in both servers
