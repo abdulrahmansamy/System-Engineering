@@ -39,7 +39,7 @@ done
 
 echo -e "\n\nChecking the connectivity to the Nodes\n======================================\n"
 for x in `egrep -i 'master|worker' /etc/hosts | cut -f 2` ; do ssh $x hostname ; done
-
+=======================
 
 
 
