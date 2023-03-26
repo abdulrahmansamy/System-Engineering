@@ -31,6 +31,18 @@ mysql -uroot -p
 ALTER USER 'root'@'localhost' IDENTIFIED BY '1234@Pass';
 
 
+cat << EOF >> ~/.mylogin.cnf
+[client]
+user = root
+password = 1234@Pass
+host = localhost
+
+[db02]
+user = root
+password = 1234@Pass
+host = db02
+EOF
+
 /*
 CREATE USER 'replica'@'172.16.42.145' IDENTIFIED BY '123@Pass';
 CREATE USER 'replica'@'db01' IDENTIFIED BY '123@Pass';
