@@ -1,9 +1,9 @@
-MySQL Installation
-==================
+## MySQL Installation
+## =====================
 
-1- Install and Secure MySQL
----------------------------
-https://dev.mysql.com/doc/mysql-yum-repo-quick-guide/en/
+# 1- Install and Secure MySQL
+# ---------------------------
+# https://dev.mysql.com/doc/mysql-yum-repo-quick-guide/en/
 
 curl -sLO https://dev.mysql.com/get/mysql80-community-release-fc37-1.noarch.rpm	## for fedora 37
 
@@ -24,22 +24,29 @@ systemctl enable mysqld --now
 
 systemctl status mysqld
 
+: << 'COMMENT'
 /*
 sudo grep 'temporary password' /var/log/mysqld.log
 mysql -uroot -p
 ALTER USER 'root'@'localhost' IDENTIFIED BY '1234@Pass';
 */
+COMMENT
 
-mysql -uroot --password=$(sudo grep 'temporary password' /var/log/mysqld.log | awk -F ' '  '{print $(13)}') -e 'ALTER USER "root"@"localhost" IDENTIFIED BY "1234@Pass";' --connect-expired-password
+mysql -uroot --password=$(sudo grep 'temporary password' /var/log/mysqld.log | grep -o '[^ ]*$') -e 'ALTER USER "root"@"localhost" IDENTIFIED BY "1234@Pass";' --connect-expired-password
 mysql -uroot -p1234@Pass -e 'SHOW DATABASES;'
 
-cat << EOF >> ~/.mylogin.cnf
+mysql -uroot -p1234@Pass -e 'CREATE USER "root"@"%" IDENTIFIED BY "1234@Pass"';
+
+cat << EOF > ~/.my.cnf
 [client]
 user = root
 password = 1234@Pass
 host = localhost
 EOF
 
+mysql_config_editor set --login-path=client --user=root --host=localhost --password
+
+: << 'COMMENT'
 /*
 CREATE USER 'replica'@'172.16.42.145' IDENTIFIED BY '123@Pass';
 CREATE USER 'replica'@'db01' IDENTIFIED BY '123@Pass';
@@ -53,7 +60,7 @@ CREATE USER 'replica'@'%' IDENTIFIED BY '123@Pass';
 GRANT ALL PRIVILEGES ON *.* TO 'replica'@'%';
  WITH GRANT OPTION;
 */
-
+COMMENT
 
 2- Prepration For MySQL Clustering
 ----------------------------------
@@ -69,7 +76,12 @@ EOF
 
 
 
-cat << EOF >> ~/.mylogin.cnf
+cat << EOF >> ~/.my.cnf
+
+[db01]
+user = root
+password = 1234@Pass
+host = db01
 
 [db02]
 user = root
