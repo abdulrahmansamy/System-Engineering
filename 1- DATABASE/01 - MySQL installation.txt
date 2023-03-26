@@ -36,11 +36,6 @@ cat << EOF >> ~/.mylogin.cnf
 user = root
 password = 1234@Pass
 host = localhost
-
-[db02]
-user = root
-password = 1234@Pass
-host = db02
 EOF
 
 /*
@@ -62,12 +57,24 @@ GRANT ALL PRIVILEGES ON *.* TO 'replica'@'%';
 ----------------------------------
 
 hostnamectl set-hostname db01.cluster02.mysql
+hostnamectl set-hostname db02.cluster02.mysql
 
 cat << EOF >> /etc/hosts
 
 172.16.42.148	db01.cluster01.mysql	db01
 172.16.42.149	db02.cluster01.mysql	db02
 EOF
+
+
+
+cat << EOF >> ~/.mylogin.cnf
+
+[db02]
+user = root
+password = 1234@Pass
+host = db02
+EOF
+
 
 firewall-cmd --permanent --add-service=mysql 
 firewall-cmd --reload 
