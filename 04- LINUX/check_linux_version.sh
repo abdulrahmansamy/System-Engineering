@@ -20,6 +20,16 @@ elif [[ $(grep -E '^(ID|NAME)="?' /etc/os-release | awk -F= '{print $2}' | tr -d
     else
         echo "Unsupported CentOS version"
     fi
+elif [[ $(grep -E '^(NAME)="?' /etc/os-release | awk -F= '{print $2}' | tr -d '"') == "Fedora Linux" ]]; then
+    if [[ $(grep -E '^(VERSION_ID)="?' /etc/os-release | awk -F= '{print $2}' | tr -d '"') == "36" ]]; then
+        echo "Running Fedora 36"
+        # Run command for CentOS 7
+    elif [[ $(grep -E '^(VERSION_ID)="?' /etc/os-release | awk -F= '{print $2}' | tr -d '"') == "37" ]]; then
+        echo "Running Fedora 37"
+        # Run command for CentOS 8
+    else
+        echo "Unsupported CentOS version"
+    fi
 else
     echo "Unsupported Linux distribution"
 fi
