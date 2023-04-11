@@ -1,5 +1,5 @@
 # System Engineering
-Implementation and installation scripts for different tools:
+Implementation/installation scripts and tips/tricks for different tools:
 1. Linux
 2. Kubernetes
 3. Database
