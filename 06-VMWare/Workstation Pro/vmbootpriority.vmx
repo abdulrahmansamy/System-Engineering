@@ -1,0 +1,2 @@
+firmware = "bios"
+bios.bootOrder = "cdrom,hdd,floppy"
