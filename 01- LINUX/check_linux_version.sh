@@ -44,3 +44,6 @@ elif [[ $(system_profiler SPSoftwareDataType | grep -i 'system version' | awk -F
 else
     echo "Unsupported Linux distribution"
 fi
+
+# you can use this to get the redhat version
+# rpm -qa '(oraclelinux|sl|redhat|centos|fedora|rocky|alma)*release(|-server)' --queryformat '%{VERSION}'
