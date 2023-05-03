@@ -1,2 +1,11 @@
+```
 firmware = "bios"
 bios.bootOrder = "cdrom,hdd,floppy"
+```
+
+```
+bios.bootOrder = "hdd,cdrom,floppy"
+```
+```
+firmware = "efi"
+```
