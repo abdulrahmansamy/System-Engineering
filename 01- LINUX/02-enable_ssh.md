@@ -22,11 +22,11 @@ ssh <username>@<public_IP> -p22
 
 ## Disable Root SSH login
 
-
+Edit the sshd configuration file
 ```
 sudo vim /etc/ssh/sshd_config
 ```
-
+Change this Parameter to:
 ```
 PermitRootLogin no
 ```
@@ -34,7 +34,7 @@ Or, to allow root using `Public Keys`
 ```
 PermitRootLogin prohibit-password
 ```
-
+Save, and restart the service
 ```
 sudo systemctl restart sshd.service
 ```
