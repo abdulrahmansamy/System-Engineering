@@ -19,3 +19,22 @@ sudo systemctl status sshd.service
 ```
 ssh <username>@<public_IP> -p22
 ```
+
+## Disable Root SSH login
+
+
+```
+sudo vim /etc/ssh/sshd_config
+```
+
+```
+PermitRootLogin no
+```
+Or, to allow root using `Public Keys`
+```
+PermitRootLogin prohibit-password
+```
+
+```
+sudo systemctl restart sshd.service
+```
