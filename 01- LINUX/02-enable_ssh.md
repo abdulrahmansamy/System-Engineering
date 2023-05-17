@@ -8,7 +8,7 @@ sudo systemctl enable ssh.service --now
 sudo systemctl status ssh.service
 ```
 
-## For RHEL/Centos/fedora
+## For RHEL/Centos/Fedora
 ```
 sudo yum install -y openssh-server
 sudo systemctl enable sshd.service --now
