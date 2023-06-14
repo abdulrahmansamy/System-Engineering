@@ -6,6 +6,6 @@ sudo bash -c 'echo "<username>        ALL=(ALL)       NOPASSWD: ALL" > /etc/sudo
 ```
 Or:
 ```
-USER01=<username>
-echo "${USER01}        ALL=(ALL)       NOPASSWD: ALL" | sudo tee /etc/sudoers.d/${USER01} 
+NAME=<username>
+echo "${NAME}        ALL=(ALL)       NOPASSWD: ALL" | sudo tee /etc/sudoers.d/${NAME} 
 ```
