@@ -1,5 +1,7 @@
 
+# Adding Repositories
 
+### MariaDB for Example
 ```
 sudo bash -c 'cat << "EOF" > /etc/yum.repos.d/MariaDB.repo
 # MariaDB 10.11 Fedora repository list - created 2023-05-03 11:40 UTC
