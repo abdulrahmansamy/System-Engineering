@@ -7,5 +7,7 @@ sudo bash -c 'echo "<username>        ALL=(ALL)       NOPASSWD: ALL" > /etc/sudo
 Or:
 ```
 NAME=<username>
+```
+```
 echo "${NAME}        ALL=(ALL)       NOPASSWD: ALL" | sudo tee /etc/sudoers.d/${NAME} 
 ```
