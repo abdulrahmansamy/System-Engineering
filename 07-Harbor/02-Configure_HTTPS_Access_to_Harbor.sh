@@ -5,13 +5,13 @@
 
 COUNTRYNAME="SA"
 COMMONNAME=$(hostname)
-YOURDOMAIN=$(hostname)
+export YOURDOMAIN=$(hostname)
 FQDN=$(hostname)
 ORGANIZATION="SOLUTIONSBYSTC"
 STATE="RIYADH"
 LOCALITY="RIYADH"
 ORGANIZATIONUNIT="CLOUDENGINEERING"
-
+export CERTIFICATE_DIR="/data/cert/"
 DOCKER_CERT_DIRECTORY="/etc/docker/certs.d/"
 PODMAN_CERT_DIRECTORY="/etc/containers/certs.d/"
 
@@ -91,7 +91,7 @@ echo
 echo -e "Provide the Certificates to Harbor and the Contianer Engine"
 echo -e "==========================================================="
 
-sudo mkdir -p /data/cert/
+sudo mkdir -p $CERTIFICATE_DIR
 sudo cp ~/certs/$YOURDOMAIN.crt /data/cert/
 sudo cp ~/certs/$YOURDOMAIN.key /data/cert/
 tree /data/cert/
