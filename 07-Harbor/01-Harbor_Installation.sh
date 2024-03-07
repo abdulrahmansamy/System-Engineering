@@ -8,12 +8,12 @@ echo -e "\033[1mDownload Harbor Online Packages\033[0m"
 echo -e "\033[1m===============================\033[0m"
 
 
-mkdir -p harbor/online-installer &&  cd harbor/
+mkdir -p ~/harbor/online-installer &&  cd ~/harbor/
 
 
-wget -O harbor-online-installer-v2.9.2.tgz https://github.com/goharbor/harbor/releases/download/v2.9.2/harbor-online-installer-v2.9.2.tgz 
+wget -O ~/harbor/harbor-online-installer-v2.9.2.tgz https://github.com/goharbor/harbor/releases/download/v2.9.2/harbor-online-installer-v2.9.2.tgz 
 
-wget -O harbor-online-installer-v2.9.2.tgz.asc https://github.com/goharbor/harbor/releases/download/v2.9.2/harbor-online-installer-v2.9.2.tgz.asc
+wget -O ~/harbor/harbor-online-installer-v2.9.2.tgz.asc https://github.com/goharbor/harbor/releases/download/v2.9.2/harbor-online-installer-v2.9.2.tgz.asc
 
 
 
@@ -30,4 +30,4 @@ echo
 echo -e "\033[1mExtracting the Package\033[0m"
 echo -e "\033[1m======================\033[0m"
 
-tar xzvf harbor-online-installer-v2.9.2.tgz -C online-installer
+tar xzvf harbor-online-installer-v2.9.2.tgz -C ~/harbor/online-installer
