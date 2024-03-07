@@ -1,6 +1,6 @@
 # Install Harbor
 
-```
+```bash
 chmod +x *.sh
 ```
 
