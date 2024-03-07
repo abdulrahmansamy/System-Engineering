@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export CERTIFICATE_DIR="/data/cert/"
+export CERTIFICATE_DIR="/data/cert"
 export YOURDOMAIN=$(hostname)
 
 cp ~/harbor/online-installer/harbor/harbor.yml.tmpl ~/harbor/online-installer/harbor/harbor.yml
