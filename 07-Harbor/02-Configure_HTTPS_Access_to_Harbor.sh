@@ -16,8 +16,8 @@ DOCKER_CERT_DIRECTORY="/etc/docker/certs.d/"
 PODMAN_CERT_DIRECTORY="/etc/containers/certs.d/"
 
 echo 
-echo -e "Varifying docker and podman installation"
-echo -e "========================================"
+echo -e "\033[1mVarifying docker and podman installation\033[0m"
+echo -e "\033[1m========================================\033[0m"
 
 
 rpm -q podman &> /dev/null
@@ -39,8 +39,8 @@ mkdir -p ~/certs/
 
 
 echo
-echo -e "Generate a Certificate Authority Certificate"
-echo -e "============================================"
+echo -e "\033[1mGenerate a Certificate Authority Certificate\033[0m"
+echo -e "\033[1m============================================\033[0m"
 openssl genrsa -out ~/certs/ca.key 4096
 
 # openssl rsa -noout -text -in ~/certs/ca.key
@@ -55,8 +55,8 @@ openssl x509 -noout -text -in ~/certs/ca.crt | grep -i issuer
 
 
 echo
-echo -e "Generate a Server Certificate"
-echo -e "============================="
+echo -e "\033[1mGenerate a Server Certificate\033[0m"
+echo -e "\033[1m=============================\033[0m"
 
 openssl genrsa -out ~/certs/$YOURDOMAIN.key 4096
 
@@ -88,8 +88,8 @@ openssl x509 -req -sha512 -days 3650 \
 
 
 echo
-echo -e "Provide the Certificates to Harbor and the Contianer Engine"
-echo -e "==========================================================="
+echo -e "\033[1mProvide the Certificates to Harbor and the Contianer Engine\033[0m"
+echo -e "\033[1m===========================================================\033[0m"
 
 sudo mkdir -p $CERTIFICATE_DIR
 sudo cp ~/certs/$YOURDOMAIN.crt /data/cert/
