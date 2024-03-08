@@ -27,7 +27,7 @@ else
     echo "Podman is not installed!" | grep -iE "podman|docker"
 fi
 
-rpm -q docker || rpm -q docker-ce &> /dev/null
+rpm -q docker &> /dev/null || rpm -q docker-ce &> /dev/null
 if [ $? -eq 0 ]; then
     echo "Docker is installed!" | grep -iE "podman|docker"
 else
