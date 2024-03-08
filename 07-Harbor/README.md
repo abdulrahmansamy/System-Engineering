@@ -4,7 +4,7 @@
 chmod +x *.sh
 
 for script in *.sh; do
-    bash "$script"
+    bash "$script" || break
 done
 ```
 
