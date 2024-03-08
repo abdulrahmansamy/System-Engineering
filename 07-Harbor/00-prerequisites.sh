@@ -24,17 +24,17 @@ pip3 --version
 
 
 echo
-echo -e "\033[1mInstalling podman\033[0m"
+echo -e "\033[1mRemoving podman\033[0m"
 echo -e "\033[1m=================\033[0m"
 #sudo dnf -y install podman
 sudo dnf -y remove podman
 
 
 echo
-echo -e "\033[1mInstalling podman-compose\033[0m"
+echo -e "\033[1mUninstalling podman-compose\033[0m"
 echo -e "\033[1m=========================\033[0m"
 # sudo dnf install podman-compose
-pip3 install podman-compose
+pip3 uninstall podman-compose
 
 podman-compose --version
 
