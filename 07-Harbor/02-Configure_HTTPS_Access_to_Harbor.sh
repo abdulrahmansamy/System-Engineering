@@ -27,7 +27,7 @@ else
     echo "Podman is not installed!" | grep -iE "podman|docker"
 fi
 
-rpm -q docker &> /dev/null
+rpm -q docker || rpm -q docker-ce &> /dev/null
 if [ $? -eq 0 ]; then
     echo "Docker is installed!" | grep -iE "podman|docker"
 else
@@ -100,14 +100,15 @@ tree /data/cert/
 openssl x509 -inform PEM -in ~/certs/$YOURDOMAIN.crt -out ~/certs/$YOURDOMAIN.cert
 
 if [ -d "$DOCKER_CERT_DIRECTORY" ]; then
-    echo "Copying Certificate files to $DOCKER_CERT_DIRECTORY"
+    echo "\033[1mPCopying Certificate files to $DOCKER_CERT_DIRECTORY/certs.d\033[0m"
+    echo 
 
     sudo mkdir -p /etc/docker/certs.d/$YOURDOMAIN/
     sudo cp ~/certs/$YOURDOMAIN.cert /etc/docker/certs.d/$YOURDOMAIN/
     sudo cp ~/certs/$YOURDOMAIN.key /etc/docker/certs.d/$YOURDOMAIN/
     sudo cp ~/certs/ca.crt /etc/docker/certs.d/$YOURDOMAIN/
 
-    tree $DOCKER_CERT_DIRECTORY
+    tree $DOCKER_CERT_DIRECTORY/certs.d
     sudo systemctl restart docker
     if [ $? -eq 0 ]; then echo "Docker Engine is Restarted!" | grep -iE "podman|docker"; fi
 
