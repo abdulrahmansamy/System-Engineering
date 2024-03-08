@@ -65,6 +65,11 @@ sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/dock
 
 sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
+
+#sudo usermod -aG docker $(id -un) && newgrp docker
+sudo chmod 666 /var/run/docker.sock
+
+
 echo 
 echo -e "\033[1mInstalling docker compose\033[0m"
 echo -e "\033[1m=========================\033[0m"
@@ -74,6 +79,9 @@ sudo systemctl start docker
 
 docker --version
 docker-compose --version
+
+echo
+docker run --rm hello-world
 
 echo
 echo -e "\033[1mAllowing 443, 4443 and 80 ports and HTTPS,HTTPS protocols\033[0m"
