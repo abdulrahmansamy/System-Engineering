@@ -53,7 +53,8 @@ sudo dnf remove  docker \
                   docker-logrotate \
                   docker-selinux \
                   docker-engine-selinux \
-                  docker-engine
+                  docker-engine \
+                  docker-compose
 
 echo 
 echo -e "\033[1mInstalling docker\033[0m"
