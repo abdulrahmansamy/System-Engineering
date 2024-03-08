@@ -1,6 +1,9 @@
 #!/bin/bash
 
 REGFQDN=$(hostname)
+
+echo -e "Running installing script"
+echo -e "========================="
 source ~/harbor/online-installer/harbor/install.sh 
 
 
