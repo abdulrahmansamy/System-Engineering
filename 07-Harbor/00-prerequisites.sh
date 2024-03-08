@@ -15,12 +15,12 @@ sudo dnf install -y openssl
 echo
 echo -e "\033[1mInstalling python package system\033[0m"
 echo -e "\033[1m================================\033[0m"
-sudo dnf install -v --assumeyes python3-pip
+# sudo dnf install --assumeyes python3-pip
 
 echo
 echo -e "\033[1mThe pip version is:\033[0m"
 echo -e "\033[1m===================\033[0m"
-pip3 --version
+# pip3 --version
 
 
 echo
@@ -34,9 +34,9 @@ echo
 echo -e "\033[1mUninstalling podman-compose\033[0m"
 echo -e "\033[1m=========================\033[0m"
 # sudo dnf install podman-compose
-pip3 uninstall -y podman-compose
+# pip3 uninstall -y podman-compose
 
-podman-compose --version
+# podman-compose --version
 
 echo 
 echo -e "\033[1mRemoving old versions of docker\033[0m"
@@ -44,7 +44,7 @@ echo -e "\033[1m===============================\033[0m"
 
 
 
-sudo dnf remove -y docker \
+sudo dnf remove  docker \
                   docker-client \
                   docker-client-latest \
                   docker-common \
