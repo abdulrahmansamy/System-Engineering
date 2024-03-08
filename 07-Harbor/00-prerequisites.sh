@@ -26,7 +26,8 @@ pip3 --version
 echo
 echo -e "\033[1mInstalling podman\033[0m"
 echo -e "\033[1m=================\033[0m"
-sudo dnf -y install podman
+#sudo dnf -y install podman
+sudo dnf -y remove podman
 
 
 echo
