@@ -34,7 +34,7 @@ echo
 echo -e "\033[1mUninstalling podman-compose\033[0m"
 echo -e "\033[1m=========================\033[0m"
 # sudo dnf install podman-compose
-pip3 uninstall podman-compose
+pip3 uninstall -y podman-compose
 
 podman-compose --version
 
