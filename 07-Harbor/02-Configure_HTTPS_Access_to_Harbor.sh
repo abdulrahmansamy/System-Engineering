@@ -12,7 +12,7 @@ STATE="RIYADH"
 LOCALITY="RIYADH"
 ORGANIZATIONUNIT="CLOUDENGINEERING"
 export CERTIFICATE_DIR="/data/cert/"
-DOCKER_CERT_DIRECTORY="/etc/docker/certs.d/"
+DOCKER_CERT_DIRECTORY="/etc/docker"
 PODMAN_CERT_DIRECTORY="/etc/containers/certs.d/"
 
 echo 
