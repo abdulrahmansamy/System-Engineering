@@ -1,10 +1,12 @@
 #!/bin/bash -e
 
-REGFQDN=$(hostname)
+#REGFQDN=$(hostname)
+
+source setup_vars.sh
 
 echo
-echo -e "Running installing script"
-echo -e "========================="
+echo -e "[Step 04]: Running installing script"
+echo -e "===================================="
 cd ~/harbor/online-installer/harbor/
 source ./install.sh 
 

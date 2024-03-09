@@ -6,6 +6,7 @@ echo
 echo -e "\033[1m[Step 02]: Configure HTTPS Access to Harbor\033[0m"
 echo -e "\033[1m===========================================\033[0m"
 
+
 COUNTRYNAME="SA"
 COMMONNAME=$(hostname)
 export YOURDOMAIN=$(hostname)
@@ -17,6 +18,8 @@ ORGANIZATIONUNIT="CLOUDENGINEERING"
 export CERTIFICATE_DIR="/data/cert/"
 DOCKER_CERT_DIRECTORY="/etc/docker"
 PODMAN_CERT_DIRECTORY="/etc/containers/certs.d/"
+
+source setup_vars.sh
 
 echo 
 echo -e "\033[1m[Step 02.1]: Varifying docker and podman installation\033[0m"
@@ -105,7 +108,8 @@ tree /data/cert/
 openssl x509 -inform PEM -in ~/certs/$YOURDOMAIN.crt -out ~/certs/$YOURDOMAIN.cert
 
 if [ -d "$DOCKER_CERT_DIRECTORY" ]; then
-    echo "\033[1mPCopying Certificate files to $DOCKER_CERT_DIRECTORY/certs.d\033[0m"
+    echo
+    echo -e "\033[1mCopying Certificate files to $DOCKER_CERT_DIRECTORY/certs.d\033[0m"
     echo 
 
     sudo mkdir -p /etc/docker/certs.d/$YOURDOMAIN/
