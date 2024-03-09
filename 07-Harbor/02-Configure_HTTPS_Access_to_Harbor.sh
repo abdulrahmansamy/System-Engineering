@@ -7,17 +7,17 @@ echo -e "\033[1m[Step 02]: Configure HTTPS Access to Harbor\033[0m"
 echo -e "\033[1m===========================================\033[0m"
 
 
-COUNTRYNAME="SA"
-COMMONNAME=$(hostname)
-export YOURDOMAIN=$(hostname)
-FQDN=$(hostname)
-ORGANIZATION="SOLUTIONSBYSTC"
-STATE="RIYADH"
-LOCALITY="RIYADH"
-ORGANIZATIONUNIT="CLOUDENGINEERING"
-export CERTIFICATE_DIR="/data/cert/"
-DOCKER_CERT_DIRECTORY="/etc/docker"
-PODMAN_CERT_DIRECTORY="/etc/containers/certs.d/"
+#COUNTRYNAME="SA"
+#COMMONNAME=$(hostname)
+#export YOURDOMAIN=$(hostname)
+#FQDN=$(hostname)
+#ORGANIZATION="SOLUTIONSBYSTC"
+#STATE="RIYADH"
+#LOCALITY="RIYADH"
+#ORGANIZATIONUNIT="CLOUDENGINEERING"
+#export CERTIFICATE_DIR="/data/cert/"
+#DOCKER_CERT_DIRECTORY="/etc/docker"
+#PODMAN_CERT_DIRECTORY="/etc/containers/certs.d/"
 
 source setup_vars.sh
 
