@@ -5,8 +5,8 @@
 source setup_vars.sh
 
 echo
-echo -e "[Step 04]: Running installing script"
-echo -e "===================================="
+echo -e "$Yellow[Step 04]: Running installing script\033[0m"
+echo -e "$Yellow====================================\033[0m"
 cd ~/harbor/online-installer/harbor/
 source ./install.sh 
 
