@@ -1,10 +1,12 @@
 #!/bin/bash -e
 
+source setup_vars.sh
+
 # Configure HTTPS Access to Harbor
 
 echo 
-echo -e "\033[1m[Step 02]: Configure HTTPS Access to Harbor\033[0m"
-echo -e "\033[1m===========================================\033[0m"
+echo -e "$Yellow[Step 02]: Configure HTTPS Access to Harbor\033[0m"
+echo -e "$Yellow===========================================\033[0m"
 
 
 #COUNTRYNAME="SA"
@@ -22,8 +24,8 @@ echo -e "\033[1m===========================================\033[0m"
 source setup_vars.sh
 
 echo 
-echo -e "\033[1m[Step 02.1]: Varifying docker and podman installation\033[0m"
-echo -e "\033[1m-----------------------------------------------------\033[0m"
+echo -e "$Light_Yellow[Step 02.1]: Varifying docker and podman installation\033[0m"
+echo -e "$Light_Yellow-----------------------------------------------------\033[0m"
 
 echo
 
@@ -45,8 +47,8 @@ fi
 
 
 echo
-echo -e "\033[1m[Step 02.2]: Generate a Certificate Authority Certificate\033[0m"
-echo -e "\033[1m---------------------------------------------------------\033[0m"
+echo -e "$Light_Yellow[Step 02.2]: Generate a Certificate Authority Certificate\033[0m"
+echo -e "$Light_Yellow---------------------------------------------------------\033[0m"
 
 mkdir -p ~/certs/
 openssl genrsa -out ~/certs/ca.key 4096
@@ -63,8 +65,8 @@ openssl x509 -noout -text -in ~/certs/ca.crt | grep -i issuer
 
 
 echo
-echo -e "\033[1m[Step 02.2]: Generate a Server Certificate\033[0m"
-echo -e "\033[1m------------------------------------------\033[0m"
+echo -e "$Light_Yellow[Step 02.2]: Generate a Server Certificate\033[0m"
+echo -e "$Light_Yellow------------------------------------------\033[0m"
 
 openssl genrsa -out ~/certs/$YOURDOMAIN.key 4096
 
