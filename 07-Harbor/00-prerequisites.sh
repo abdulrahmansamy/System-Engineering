@@ -82,6 +82,7 @@ docker-compose --version
 
 echo
 docker run --rm hello-world
+docker pull goharbor/prepare:v2.9.2
 
 echo
 echo -e "$Light_Yellow[Stage 00.5]: Allowing 443, 4443 and 80 ports and HTTPS,HTTPS protocols$NOCOLOR"
