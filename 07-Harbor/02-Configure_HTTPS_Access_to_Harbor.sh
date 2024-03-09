@@ -5,7 +5,7 @@ source setup_vars.sh
 # Configure HTTPS Access to Harbor
 
 echo 
-echo -e "$Yellow[Step 02]: Configure HTTPS Access to Harbor$NOCOLOR"
+echo -e "$Yellow[Stage 02]: Configure HTTPS Access to Harbor$NOCOLOR"
 echo -e "$Yellow===========================================$NOCOLOR"
 
 
@@ -24,7 +24,7 @@ echo -e "$Yellow===========================================$NOCOLOR"
 source setup_vars.sh
 
 echo 
-echo -e "$Light_Yellow[Step 02.1]: Varifying docker and podman installation$NOCOLOR"
+echo -e "$Light_Yellow[Stage 02.1]: Varifying docker and podman installation$NOCOLOR"
 echo -e "$Light_Yellow-----------------------------------------------------$NOCOLOR"
 
 echo
@@ -47,7 +47,7 @@ fi
 
 
 echo
-echo -e "$Light_Yellow[Step 02.2]: Generate a Certificate Authority Certificate$NOCOLOR"
+echo -e "$Light_Yellow[Stage 02.2]: Generate a Certificate Authority Certificate$NOCOLOR"
 echo -e "$Light_Yellow---------------------------------------------------------$NOCOLOR"
 
 mkdir -p ~/certs/
@@ -65,7 +65,7 @@ openssl x509 -noout -text -in ~/certs/ca.crt | grep -i issuer
 
 
 echo
-echo -e "$Light_Yellow[Step 02.2]: Generate a Server Certificate$NOCOLOR"
+echo -e "$Light_Yellow[Stage 02.2]: Generate a Server Certificate$NOCOLOR"
 echo -e "$Light_Yellow------------------------------------------$NOCOLOR"
 
 openssl genrsa -out ~/certs/$YOURDOMAIN.key 4096
@@ -98,7 +98,7 @@ openssl x509 -req -sha512 -days 3650 \
 
 
 echo
-echo -e "$Light_Yellow[Step 02.3]: Provide the Certificates to Harbor and the Contianer Engine$NOCOLOR"
+echo -e "$Light_Yellow[Stage 02.3]: Provide the Certificates to Harbor and the Contianer Engine$NOCOLOR"
 echo -e "$Light_Yellow------------------------------------------------------------------------$NOCOLOR"
 
 sudo mkdir -p $CERTIFICATE_DIR

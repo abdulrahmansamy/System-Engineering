@@ -8,7 +8,7 @@ source setup_vars.sh
 cp ~/harbor/online-installer/harbor/harbor.yml.tmpl ~/harbor/online-installer/harbor/harbor.yml
 
 echo 
-echo -e "$Yellow[Step 03]: Configure Harbor Yaml file$NOCOLOR"
+echo -e "$Yellow[Stage 03]: Configure Harbor Yaml file$NOCOLOR"
 echo -e "$Yellow=====================================$NOCOLOR"
 
 sed -i "s|reg.mydomain.com|$YOURDOMAIN|g" ~/harbor/online-installer/harbor/harbor.yml

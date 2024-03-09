@@ -5,11 +5,11 @@ source setup_vars.sh
 # 00-prerequisites.sh
 
 echo
-echo -e "$Yellow[Step 00]: Preparing the prerequisites$NOCOLOR"
+echo -e "$Yellow[Stage 00]: Preparing the prerequisites$NOCOLOR"
 echo -e "$Yellow======================================$NOCOLOR"
 
 echo
-echo -e "$Light_Yellow[Step 00.1]: Updating the package repos$NOCOLOR"
+echo -e "$Light_Yellow[Stage 00.1]: Updating the package repos$NOCOLOR"
 echo -e "$Light_Yellow---------------------------------------$NOCOLOR"
 sudo dnf -yv update
 sudo dnf install -y openssl
@@ -41,7 +41,7 @@ sudo dnf install -y openssl
 # podman-compose --version
 
 echo 
-echo -e "$Light_Yellow[Step 00.2]: Removing old versions of docker$NOCOLOR"
+echo -e "$Light_Yellow[Stage 00.2]: Removing old versions of docker$NOCOLOR"
 echo -e "$Light_Yellow--------------------------------------------$NOCOLOR"
 
 sudo dnf remove  docker \
@@ -57,7 +57,7 @@ sudo dnf remove  docker \
                   docker-compose
 
 echo 
-echo -e "$Light_Yellow[Step 00.3]: Installing docker$NOCOLOR"
+echo -e "$Light_Yellow[Stage 00.3]: Installing docker$NOCOLOR"
 echo -e "$Light_Yellow------------------------------$NOCOLOR"
 
 sudo dnf -y install dnf-plugins-core
@@ -71,7 +71,7 @@ sudo chmod 666 /var/run/docker.sock
 
 
 echo 
-echo -e "$Light_Yellow[Step 00.4]: Installing docker compose$NOCOLOR"
+echo -e "$Light_Yellow[Stage 00.4]: Installing docker compose$NOCOLOR"
 echo -e "$Light_Yellow--------------------------------------$NOCOLOR"
 sudo dnf install -qy docker-compose
 
@@ -84,7 +84,7 @@ echo
 docker run --rm hello-world
 
 echo
-echo -e "$Light_Yellow[Step 00.5]: Allowing 443, 4443 and 80 ports and HTTPS,HTTPS protocols$NOCOLOR"
+echo -e "$Light_Yellow[Stage 00.5]: Allowing 443, 4443 and 80 ports and HTTPS,HTTPS protocols$NOCOLOR"
 echo -e "$Light_Yellow----------------------------------------------------------------------$NOCOLOR"
 
 sudo firewall-cmd --add-port={443/tcp,4443/tcp,80/tcp}

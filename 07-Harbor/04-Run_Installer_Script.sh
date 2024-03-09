@@ -5,7 +5,7 @@
 source setup_vars.sh
 
 echo
-echo -e "$Yellow[Step 04]: Running Harbor installation script$NOCOLOR"
+echo -e "$Yellow[Stage 04]: Running Harbor installation script$NOCOLOR"
 echo -e "$Yellow=============================================$NOCOLOR"
 cd ~/harbor/online-installer/harbor/
 source ./install.sh 
