@@ -1,10 +1,15 @@
 # Install Harbor
 
+
 ```bash
 mkdir -p ~/git && cd ~/git \
 && rm -fr ~/git/System-Engineering \
 && git clone https://github.com/abdulrahmansamy/System-Engineering.git \
 && cd System-Engineering/07-Harbor/
+```
+
+```bash
+vim setup_vars.sh
 ```
 
 ```bash
