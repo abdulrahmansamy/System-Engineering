@@ -123,7 +123,6 @@ if [ -d "$DOCKER_CERT_DIRECTORY" ]; then
     tree $DOCKER_CERT_DIRECTORY/certs.d
     sudo systemctl restart docker
     if [ $? -eq 0 ]; then echo "Docker Engine is Restarted!" | grep -iE "podman|docker"; fi
-    if [ $? ]; then echo "Docker Engine is Restarted!" | grep -iE "podman|docker"; fi
 
 
 elif [ -d "$PODMAN_CERT_DIRECTORY" ]; then
@@ -137,6 +136,6 @@ elif [ -d "$PODMAN_CERT_DIRECTORY" ]; then
 
     tree $PODMAN_CERT_DIRECTORY
     sudo systemctl restart podman
-    if [ $? ]; then echo "Podman Engine is Restarted!" | grep -iE "podman|docker"; fi
+    if [ $? -eq 0 ]; then echo "Podman Engine is Restarted!" | grep -iE "podman|docker"; fi
 fi
 
