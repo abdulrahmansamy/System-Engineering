@@ -66,7 +66,7 @@ openssl x509 -noout -text -in ~/certs/ca.crt | grep -i issuer
 
 echo
 echo -e "$Light_Yellow[Stage 02.2]: Generate a Server Certificate$NOCOLOR"
-echo -e "$Light_Yellow------------------------------------------$NOCOLOR"
+echo -e "$Light_Yellow-------------------------------------------$NOCOLOR"
 
 openssl genrsa -out ~/certs/$YOURDOMAIN.key 4096
 

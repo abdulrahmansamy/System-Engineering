@@ -42,7 +42,7 @@ sudo dnf install -y openssl
 
 echo 
 echo -e "$Light_Yellow[Stage 00.2]: Removing old versions of docker$NOCOLOR"
-echo -e "$Light_Yellow--------------------------------------------$NOCOLOR"
+echo -e "$Light_Yellow---------------------------------------------$NOCOLOR"
 
 sudo dnf remove  docker \
                   docker-client \
