@@ -5,8 +5,8 @@ source setup_vars.sh
 # Configure HTTPS Access to Harbor
 
 echo 
-echo -e "$Yellow[Step 02]: Configure HTTPS Access to Harbor\033[0m"
-echo -e "$Yellow===========================================\033[0m"
+echo -e "$Yellow[Step 02]: Configure HTTPS Access to Harbor$NOCOLOR"
+echo -e "$Yellow===========================================$NOCOLOR"
 
 
 #COUNTRYNAME="SA"
@@ -24,8 +24,8 @@ echo -e "$Yellow===========================================\033[0m"
 source setup_vars.sh
 
 echo 
-echo -e "$Light_Yellow[Step 02.1]: Varifying docker and podman installation\033[0m"
-echo -e "$Light_Yellow-----------------------------------------------------\033[0m"
+echo -e "$Light_Yellow[Step 02.1]: Varifying docker and podman installation$NOCOLOR"
+echo -e "$Light_Yellow-----------------------------------------------------$NOCOLOR"
 
 echo
 
@@ -47,8 +47,8 @@ fi
 
 
 echo
-echo -e "$Light_Yellow[Step 02.2]: Generate a Certificate Authority Certificate\033[0m"
-echo -e "$Light_Yellow---------------------------------------------------------\033[0m"
+echo -e "$Light_Yellow[Step 02.2]: Generate a Certificate Authority Certificate$NOCOLOR"
+echo -e "$Light_Yellow---------------------------------------------------------$NOCOLOR"
 
 mkdir -p ~/certs/
 openssl genrsa -out ~/certs/ca.key 4096
@@ -65,8 +65,8 @@ openssl x509 -noout -text -in ~/certs/ca.crt | grep -i issuer
 
 
 echo
-echo -e "$Light_Yellow[Step 02.2]: Generate a Server Certificate\033[0m"
-echo -e "$Light_Yellow------------------------------------------\033[0m"
+echo -e "$Light_Yellow[Step 02.2]: Generate a Server Certificate$NOCOLOR"
+echo -e "$Light_Yellow------------------------------------------$NOCOLOR"
 
 openssl genrsa -out ~/certs/$YOURDOMAIN.key 4096
 
@@ -98,8 +98,8 @@ openssl x509 -req -sha512 -days 3650 \
 
 
 echo
-echo -e "\033[1m[Step 02.3]: Provide the Certificates to Harbor and the Contianer Engine\033[0m"
-echo -e "\033[1m------------------------------------------------------------------------\033[0m"
+echo -e "$Light_Yellow[Step 02.3]: Provide the Certificates to Harbor and the Contianer Engine$NOCOLOR"
+echo -e "$Light_Yellow------------------------------------------------------------------------$NOCOLOR"
 
 sudo mkdir -p $CERTIFICATE_DIR
 sudo cp ~/certs/$YOURDOMAIN.crt /data/cert/
@@ -111,7 +111,7 @@ openssl x509 -inform PEM -in ~/certs/$YOURDOMAIN.crt -out ~/certs/$YOURDOMAIN.ce
 
 if [ -d "$DOCKER_CERT_DIRECTORY" ]; then
     echo
-    echo -e "\033[1mCopying Certificate files to $DOCKER_CERT_DIRECTORY/certs.d\033[0m"
+    echo -e "$Light_Yellow Copying Certificate files to $DOCKER_CERT_DIRECTORY/certs.d$NOCOLOR"
     echo 
 
     sudo mkdir -p /etc/docker/certs.d/$YOURDOMAIN/
