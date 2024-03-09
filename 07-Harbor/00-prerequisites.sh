@@ -67,7 +67,6 @@ sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin d
 
 
 #sudo usermod -aG docker $(id -un) && newgrp docker
-sudo chmod 666 /var/run/docker.sock
 
 
 echo 
@@ -76,6 +75,7 @@ echo -e "$Light_Yellow---------------------------------------$NOCOLOR"
 sudo dnf install -qy docker-compose
 
 sudo systemctl start docker
+sudo chmod 666 /var/run/docker.sock
 
 docker --version
 docker-compose --version
