@@ -5,13 +5,13 @@
 source setup_vars.sh
 
 echo
-echo -e "$Yellow[Step 04]: Running installing script$NOCOLOR"
-echo -e "$Yellow====================================$NOCOLOR"
+echo -e "$Yellow[Step 04]: Running Harbor installation script$NOCOLOR"
+echo -e "$Yellow=============================================$NOCOLOR"
 cd ~/harbor/online-installer/harbor/
 source ./install.sh 
 
 echo
-echo -e "$Yellow Logging in harbor registry$NOCOLOR"
-echo -e "$Yellow --------------------------$NOCOLOR"
+echo -e "$Light_Yellow Logging in to harbor registry$NOCOLOR"
+echo -e "$Light_Yellow -----------------------------$NOCOLOR"
 docker login $REGFQDN -u admin -p Harbor12345
 docker push $REGFQDN/myproject/myrepo:mytag
