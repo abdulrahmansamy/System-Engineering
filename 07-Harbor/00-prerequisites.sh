@@ -6,11 +6,11 @@ source setup_vars.sh
 
 echo
 echo -e "$Yellow[Stage 00]: Preparing the prerequisites$NOCOLOR"
-echo -e "$Yellow======================================$NOCOLOR"
+echo -e "$Yellow=======================================$NOCOLOR"
 
 echo
 echo -e "$Light_Yellow[Stage 00.1]: Updating the package repos$NOCOLOR"
-echo -e "$Light_Yellow---------------------------------------$NOCOLOR"
+echo -e "$Light_Yellow----------------------------------------$NOCOLOR"
 sudo dnf -yv update
 sudo dnf install -y openssl
 
@@ -58,7 +58,7 @@ sudo dnf remove  docker \
 
 echo 
 echo -e "$Light_Yellow[Stage 00.3]: Installing docker$NOCOLOR"
-echo -e "$Light_Yellow------------------------------$NOCOLOR"
+echo -e "$Light_Yellow-------------------------------$NOCOLOR"
 
 sudo dnf -y install dnf-plugins-core
 sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
@@ -72,7 +72,7 @@ sudo chmod 666 /var/run/docker.sock
 
 echo 
 echo -e "$Light_Yellow[Stage 00.4]: Installing docker compose$NOCOLOR"
-echo -e "$Light_Yellow--------------------------------------$NOCOLOR"
+echo -e "$Light_Yellow---------------------------------------$NOCOLOR"
 sudo dnf install -qy docker-compose
 
 sudo systemctl start docker
@@ -85,7 +85,7 @@ docker run --rm hello-world
 
 echo
 echo -e "$Light_Yellow[Stage 00.5]: Allowing 443, 4443 and 80 ports and HTTPS,HTTPS protocols$NOCOLOR"
-echo -e "$Light_Yellow----------------------------------------------------------------------$NOCOLOR"
+echo -e "$Light_Yellow-----------------------------------------------------------------------$NOCOLOR"
 
 sudo firewall-cmd --add-port={443/tcp,4443/tcp,80/tcp}
 sudo firewall-cmd --add-service={https,http}
