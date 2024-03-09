@@ -1,6 +1,6 @@
 # Install Harbor
 
-### 0. Install Git
+### 0. Install Pre-requisites
 ```bash
 sudo yum install -y git
 ```

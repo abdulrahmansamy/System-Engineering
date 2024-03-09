@@ -114,15 +114,16 @@ if [ -d "$DOCKER_CERT_DIRECTORY" ]; then
     echo -e "$Light_Yellow Copying Certificate files to $DOCKER_CERT_DIRECTORY/certs.d$NOCOLOR"
     echo 
 
-    sudo mkdir -p /etc/docker/certs.d/$YOURDOMAIN/
-    sudo cp ~/certs/$YOURDOMAIN.cert /etc/docker/certs.d/$YOURDOMAIN/
-    sudo cp ~/certs/$YOURDOMAIN.key /etc/docker/certs.d/$YOURDOMAIN/
-    sudo cp ~/certs/ca.crt /etc/docker/certs.d/$YOURDOMAIN/
+    sudo mkdir -p $DOCKER_CERT_DIRECTORY/certs.d/$YOURDOMAIN/
+    sudo cp ~/certs/$YOURDOMAIN.cert $DOCKER_CERT_DIRECTORY/certs.d/$YOURDOMAIN/
+    sudo cp ~/certs/$YOURDOMAIN.key $DOCKER_CERT_DIRECTORY/certs.d/$YOURDOMAIN/
+    sudo cp ~/certs/ca.crt $DOCKER_CERT_DIRECTORY/certs.d/$YOURDOMAIN/
+    sudo chmod +r -R $DOCKER_CERT_DIRECTORY/certs.d/$YOURDOMAIN/
 
     tree $DOCKER_CERT_DIRECTORY/certs.d
     sudo systemctl restart docker
-    if [ $? -eq 0 ]; then echo "Docker Engine is Restarted!" | grep -iE "
-    podman|docker"; fi
+    if [ $? -eq 0 ]; then echo "Docker Engine is Restarted!" | grep -iE "podman|docker"; fi
+    if [ $? ]; then echo "Docker Engine is Restarted!" | grep -iE "podman|docker"; fi
 
 
 elif [ -d "$PODMAN_CERT_DIRECTORY" ]; then
@@ -132,9 +133,10 @@ elif [ -d "$PODMAN_CERT_DIRECTORY" ]; then
     sudo cp ~/certs/$YOURDOMAIN.cert $PODMAN_CERT_DIRECTORY/$YOURDOMAIN/
     sudo cp ~/certs/$YOURDOMAIN.key $PODMAN_CERT_DIRECTORY/$YOURDOMAIN/
     sudo cp ~/certs/ca.crt $PODMAN_CERT_DIRECTORY/$YOURDOMAIN/
+    sudo sudo chmod +r -R $PODMAN_CERT_DIRECTORY/$YOURDOMAIN/
 
     tree $PODMAN_CERT_DIRECTORY
     sudo systemctl restart podman
-    if [ $? -eq 0 ]; then echo "Podman Engine is Restarted!" | grep -iE "podman|docker"; fi
+    if [ $? ]; then echo "Podman Engine is Restarted!" | grep -iE "podman|docker"; fi
 fi
 
