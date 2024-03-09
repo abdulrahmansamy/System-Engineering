@@ -14,4 +14,4 @@ echo
 echo -e "$Light_Yellow Logging in to the new harbor registry$NOCOLOR"
 echo -e "$Light_Yellow -------------------------------------$NOCOLOR"
 docker login $REGFQDN -u admin -p Harbor12345
-docker push $REGFQDN/myproject/myrepo:mytag
+#docker push $REGFQDN/myproject/myrepo:mytag
