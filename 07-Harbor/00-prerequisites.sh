@@ -97,3 +97,4 @@ echo -e "$Light_Yellow Ports and Services Allowed:$NOCOLOR"
 
 sudo firewall-cmd --list-all | grep -iE "https|http|443|4443|80"
 
+# https://gist.github.com/kacole2/95e83ac84fec950b1a70b0853d6594dc
