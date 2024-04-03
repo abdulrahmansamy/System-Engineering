@@ -1,18 +1,18 @@
 # LVM Partitioning
 
-## Install LVM and fs packages 
+#### 1. Install LVM and fs packages 
 
-#### for `Debian/Ubuntu`
+##### for `Debian/Ubuntu`
 ```bash
 sudo apt -y update && sudo apt -y install lvm2 && sudo apt -y install xfsprogs e2fsprogs
 
 ```
-#### for `Red Hat/CentOS/Fedora`
+##### for `Red Hat/CentOS/Fedora`
 ```bash
 sudo yum -y install lvm2 && sudo yum -y install xfsprogs e2fsprogs
 ```
 
-#### for `Suse`
+##### for `Suse`
 ```
 zypper refresh
 zypper -n in libudev-devel
@@ -39,7 +39,7 @@ LVNAME=
 MOUNTPOINT=
 ``` -->
 
-#### Partitioning Variable
+#### 2. Partitioning Variable
 ```bash
 PVNAME=<Physical Volume Name>
 VGNAME=<Volume Group Name>
@@ -47,7 +47,7 @@ LVNAME=<Logical Volume Name>
 MOUNTPOINT=<Mount Point>
 ```
 
-#### Validate your variables
+##### Validate your variables
 
 ```bash
 echo -e "Physical Volume Name\t= /dev/$PVNAME"
@@ -56,7 +56,7 @@ echo -e "Logical Volume Name\t= $LVNAME"
 echo -e "Mount Point Name\t= $MOUNTPOINT"
 ```
 
-#### Create the LVM Partition
+#### 3. Create the LVM Partition
 ```bash
 
 pvcreate /dev/$PVNAME
@@ -70,7 +70,7 @@ mount /dev/mapper/$VGNAME-$LVNAME $MOUNTPOINT
 grep $MOUNTPOINT /proc/mounts >> /etc/fstab
 
 ```
-#### Validating the partitions
+##### Validating the partitions
 
 ```bash
 pvs
@@ -80,7 +80,7 @@ lsblk -f
 df -hT
 ```
 
-#### All steps in One script for `userdata`
+##### All steps in One script for `userdata`
 
 ```bash
 PVNAME=<Physical Volume Name>
