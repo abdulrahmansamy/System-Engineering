@@ -60,7 +60,7 @@ grep $MOUNTPOINT /proc/mounts >> /etc/fstab
 
 ```
 
-
+<!-- 
 ```bash
 
 apt -y update && apt -y install lvm2 && apt -y install xfsprogs 
@@ -74,7 +74,7 @@ mkdir -p /opt/fidelis_endpoint
 mount /dev/mapper/vg_fidelis-lv_opt /opt/fidelis_endpoint
 grep /opt/fidelis_endpoint /proc/mounts >> /etc/fstab
 
-```
+``` -->
 
 ### Validating the partitions
 
@@ -88,28 +88,45 @@ df -hT
 ```
 
 ## Change the partition filesystem format
+
+### 1. unmount the current mount
 ```bash
 sudo umount /dev/mapper/$VGNAME-$LVNAME
-# sudo mkfs -t ext4 /dev/mapper/$VGNAME-$LVNAME
+```
 
+### 2. format with the required fs
+
+#### for `ext4` filesystem
+```bash
 sudo mkfs.ext4 -F /dev/mapper/$VGNAME-$LVNAME
+```
+#### for `xfs` filesystem
+```bash
+sudo mkfs.xfs -f /dev/mapper/$VGNAME-$LVNAME
+```
+### 3. Delete the old mount record
+```
+sudo sed -i.bak "\|$MOUNTPOINT|d" /etc/fstab  
+```
+<!-- # sudo sed -i.bak "/$LVNAME/d" /etc/fstab ## Delete the old mount record -->
 
-sudo sed -i.bak "/$MOUNTPOINT/d" /etc/fstab ## Delete the old mount record
-
-sudo sed -i.bak2 "/$LVNAME/d" /etc/fstab 
-
-
-
+### 4. Mount the new fs
+```bash
 mount /dev/mapper/$VGNAME-$LVNAME $MOUNTPOINT 
 grep $MOUNTPOINT /proc/mounts >> /etc/fstab
-
-lsblk -f
-df -hT
+```
+### 5. Verify the current fs and mount point
+```bash
+lsblk -f | grep -B1 $MOUNTPOINT
+df -hT | grep $MOUNTPOINT
 
 ```
 
+<!-- # sudo mkfs -t ext4 /dev/mapper/$VGNAME-$LVNAME
+# sudo sed -i.bak "/$MOUNTPOINT/d" /etc/fstab ## Delete the old mount record -->
 
-## Clear your footprint
+
+###  6. Clear your footprint
 ```bash
 
 history -c && history -w
