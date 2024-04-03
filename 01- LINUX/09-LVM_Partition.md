@@ -63,6 +63,7 @@ pvcreate /dev/$PVNAME
 vgcreate $VGNAME /dev/$PVNAME
 
 lvcreate -l 100%FREE -n $LVNAME $VGNAME
+# lvcreate  -Z n -l 100%FREE -n $LVNAME $VGNAME ##  in some cases the argument `-Z n` is required
 mkfs.xfs /dev/mapper/$VGNAME-$LVNAME
 mkdir -p $MOUNTPOINT
 mount /dev/mapper/$VGNAME-$LVNAME $MOUNTPOINT
@@ -92,6 +93,7 @@ pvcreate /dev/$PVNAME
 vgcreate $VGNAME /dev/$PVNAME
 
 lvcreate -l 100%FREE -n $LVNAME $VGNAME
+# lvcreate  -Z n -l 100%FREE -n $LVNAME $VGNAME ##  in some cases the argument `-Z n` is required
 mkfs.xfs /dev/mapper/$VGNAME-$LVNAME
 mkdir -p $MOUNTPOINT
 mount /dev/mapper/$VGNAME-$LVNAME $MOUNTPOINT
