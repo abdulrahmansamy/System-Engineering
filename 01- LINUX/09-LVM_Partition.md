@@ -171,5 +171,4 @@ sudo mkfs.ext4 -F /dev/mapper/$VGNAME-$LVNAME
 sudo sed -i.bak "\|$MOUNTPOINT|d" /etc/fstab
 mount /dev/mapper/$VGNAME-$LVNAME $MOUNTPOINT 
 grep $MOUNTPOINT /proc/mounts >> /etc/fstab
-history -c -w
 ```
