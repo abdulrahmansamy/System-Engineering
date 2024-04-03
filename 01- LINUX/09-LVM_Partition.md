@@ -2,17 +2,17 @@
 
 #### 1. Install LVM and fs packages 
 
-##### - for `Debian/Ubuntu`
+##### * for `Debian/Ubuntu`
 ```bash
 sudo apt -y update && sudo apt -y install lvm2 && sudo apt -y install xfsprogs e2fsprogs
 
 ```
-##### - for `Red Hat/CentOS/Fedora`
+##### * for `Red Hat/CentOS/Fedora`
 ```bash
 sudo yum -y install lvm2 && sudo yum -y install xfsprogs e2fsprogs
 ```
 
-##### - for `Suse`
+##### * for `Suse`
 ```
 zypper refresh
 zypper -n in libudev-devel
