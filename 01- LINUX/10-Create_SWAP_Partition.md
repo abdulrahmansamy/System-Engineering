@@ -41,7 +41,7 @@ lsblk -f
 Straight forward script
 ```bash
 fdisk -l /dev/sdb
-echo -e "n\np\n\n\n\nt\n82\nw" | fdisk /dev/$SWAPDEVICE
+echo -e "n\np\n\n\n\nt\n82\nw" | fdisk /dev/sdb
 partprobe /dev/sdb
 mkswap /dev/sdb1
 swapon /dev/sdb1
