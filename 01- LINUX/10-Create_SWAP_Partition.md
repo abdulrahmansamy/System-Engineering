@@ -1,11 +1,12 @@
 # Create SWAP Partition
 
-### determine the `SWAP` device name:
+### Determine the `SWAP` device name:
 ```bash
 lsblk -f
 ```
+Add the `SWAP` device name:
 ```bash
-SWAPDEVICE=sdb
+SWAPDEVICE=<sdb>
 ```
 ### Check the current status of the `SWAP` device:
 ```bash
@@ -27,7 +28,7 @@ if sudo fdisk -l /dev/$SWAPDEVICE | grep -qi "nvme"; then
     sudo swapon /dev/${SWAPDEVICE}1
 fi
 ```
-### Validate the configured swap device
+### Validate the configured `SWAP` device
 ```bash
 swapon -s
 free -m
@@ -37,6 +38,7 @@ grep SwapTotal /proc/meminfo
 lsblk -f
 ```
 
+streat forward script
 ```bash
 fdisk -l /dev/$SWAPDEVICE
 echo -e "n\np\n\n\n\nt\n82\nw" | fdisk /dev/$SWAPDEVICE
