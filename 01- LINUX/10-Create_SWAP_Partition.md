@@ -38,7 +38,7 @@ grep SwapTotal /proc/meminfo
 lsblk -f
 ```
 
-streat forward script
+Straight forward script
 ```bash
 fdisk -l /dev/$SWAPDEVICE
 echo -e "n\np\n\n\n\nt\n82\nw" | fdisk /dev/$SWAPDEVICE
