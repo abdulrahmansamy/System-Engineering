@@ -6,7 +6,7 @@ lsblk -f
 ```
 Add the `SWAP` device name:
 ```bash
-SWAPDEVICE=<sdb>
+SWAPDEVICE=<'sdb' for example>
 ```
 ### Check the current status of the `SWAP` device:
 ```bash
@@ -28,6 +28,21 @@ if sudo fdisk -l /dev/$SWAPDEVICE | grep -qi "nvme"; then
     sudo swapon /dev/${SWAPDEVICE}1
 fi
 ```
+
+### Add `fstab` entry for `SWAP`
+```bash
+if sudo fdisk -l /dev/$SWAPDEVICE | grep -qi "nvme"; then
+    echo "====> Adding fstab entry for NVMe device"
+    echo -e "UUID=`sudo blkid  /dev/${SWAPDEVICE}p1 -o value -s UUID`\tswap\tswap\tdefault\t0 0" | sudo tee -a /etc/fstab &> /dev/null 
+  else
+    echo "====> Adding fstab entry for non-NVMe device"
+    echo -e "UUID=`sudo blkid  /dev/${SWAPDEVICE}1 -o value -s UUID`\tswap\tswap\tdefault\t0 0" | sudo tee -a /etc/fstab &> /dev/null 
+fi
+
+swapon -a
+```
+
+
 ### Validate the configured `SWAP` device
 ```bash
 swapon -s
@@ -46,4 +61,7 @@ partprobe /dev/sdb
 mkswap /dev/sdb1
 swapon /dev/sdb1
 fdisk -l /dev/sdb
+
+echo -e "UUID=`sudo blkid  /dev/sdb1 -o value -s UUID`\tswap\tswap\tdefault\t0 0" | sudo tee -a /etc/fstab &> /dev/null 
+swapon -a
 ```
