@@ -15,3 +15,15 @@ Disconnect the root session `pts/1`:
 sudo pkill -9 -t pts/1
 
 ```
+
+# History of the ssh sessions
+
+```
+last -a
+```
+
+```
+w
+```
+
+https://solci.eu/6-commands-to-check-and-list-active-ssh-connections-in-linux-connections-in-general/
