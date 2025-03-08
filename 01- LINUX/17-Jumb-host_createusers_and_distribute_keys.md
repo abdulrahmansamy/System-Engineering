@@ -72,7 +72,7 @@ create_dev_user_in_remote_hosts() {
 
 elevating_dev_user_in_remote_hosts() {
     echo "Elvating user permessions of $DEV_USER on $server"
-    ssh $ADMIN_USER@$server "echo -e "$DEV_USER\tALL=(ALL)\tNOPASSWD: ALL" | sudo tee -a /etc/sudoers.d/$DEV_USER  >/dev/null"
+    ssh $ADMIN_USER@$server 'echo -e "$DEV_USER\tALL=(ALL)\tNOPASSWD: ALL" | sudo tee -a /etc/sudoers.d/$DEV_USER  >/dev/null'
 
 }
 
