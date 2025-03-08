@@ -29,8 +29,8 @@ cat key.pub >> /home/$user/authorized_keys
 -->
 
 ```bash
-ADMIN_USER=asamy
-DEV_USER=gotocme
+ADMIN_USER=admin
+DEV_USER=dev
 
 SSH_KEY_PATH="/home/$DEV_USER/.ssh"
 SSH_KEY="$SSH_KEY_PATH/id_rsa"
