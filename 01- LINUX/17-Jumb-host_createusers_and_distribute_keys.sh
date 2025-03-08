@@ -1,175 +1,109 @@
-gotocme
+#!/bin/bash
 
-user=gotocme2
-GROUP_NAME="dev"
-sudo groupadd $GROUP_NAME
-sudo useradd -m -G $GROUP_NAME $user
-#sudo adduser --disabled-password --gecos "" $user
-sudo mkdir -p /home/$user/.ssh
-sudo ssh-keygen -t rsa -b 2048 -f /home/$user/.ssh/id_rsa -q -N ""
-sudo chown -R $user:$user /home/$user/.ssh
-
-
-
-
-user=gotocme2
-GROUP_NAME="dev"
-sudo groupadd $GROUP_NAME
-#sudo adduser --disabled-password --gecos "" $user
-sudo useradd -m -G $GROUP_NAME $user
-sudo mkdir -p /home/$user/.ssh
-sudo touch /home/$user/.ssh/authorized_keys
-
-sudo chown -R $user:$user /home/$user/.ssh
-
-
-
-cat key.pub >> /home/$user/authorized_keys
-
-055
-
-user=gotocme
-sudo deluser $user sudo
-
-
-
-
-ssh-keygen -t rsa -b 2048 -f ~/.ssh/cooplanner_gotocme -q -N ""
-
-Load key "/home/user/.ssh/id_rsa": Permission denied
-user@xxx.xxx.xxx.xxx: Permission denied (publickey)
-
-
-sudo groupadd dev
-
-sudo usermod $DEV_USER -G dev
-
-
-
--------------------------------------------------------------------
-
-
-ADMIN_USER=asamy
-DEV_USER=gotocme
-
+# Configuration Variables
+ADMIN_USER=admin        # Existing admin user with SSH access
+DEV_USER=dev           # New developer username to be created
+GROUP_NAME="dev"       # Group name for developers
 SSH_KEY_PATH="/home/$DEV_USER/.ssh"
 SSH_KEY="$SSH_KEY_PATH/id_rsa"
 SSH_KEY_PUB="$SSH_KEY.pub"
 
+# List of remote hosts to configure
 REMOTE_HOSTS=("10.20.22.3" "10.20.21.3")
-#REMOTE_HOSTS=("172.16.42.161")
 
-sudo groupadd dev
+# Error handling
+set -e  # Exit on error
+trap 'echo "Error on line $LINENO"' ERR
 
+# Function to log messages with timestamp
+log_message() {
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1"
+}
+
+# Function to check if command succeeded
+check_success() {
+    if [ $? -eq 0 ]; then
+        log_message "SUCCESS: $1"
+    else
+        log_message "ERROR: $1"
+        exit 1
+    fi
+}
+
+# Function to create developer group
+create_dev_group() {
+    log_message "Creating developer group: $GROUP_NAME"
+    sudo groupadd $GROUP_NAME 2>/dev/null || true
+    check_success "Group creation"
+}
+
+# Function to create local user and generate SSH keys
 create_local_users_and_keys() {
     local user=$1
-
-    echo "Creating local user $user"
-	sudo useradd -m -s /bin/bash $user
- 	sudo usermod $user -G dev
-
-    #sudo adduser --disabled-password --gecos "" $user
+    log_message "Creating local user: $user"
+    
+    # Create user and add to dev group
+    sudo useradd -m -s /bin/bash $user
+    sudo usermod $user -G $GROUP_NAME
+    
+    # Setup SSH directory and keys
+    log_message "Generating SSH keys for $user"
     sudo mkdir -p /home/$user/.ssh
     sudo ssh-keygen -t rsa -b 4096 -f /home/$user/.ssh/id_rsa -q -N 'aSNzPq&%6xagJ!t2'
     sudo chown -R $user:$user /home/$user/.ssh
+    sudo chmod 700 /home/$user/.ssh
+    sudo chmod 600 /home/$user/.ssh/id_rsa
+    
+    check_success "Local user setup"
 }
 
-
-
+# Function to create user on remote hosts
 create_dev_user_in_remote_hosts() {
     local server=$1
-
-    echo "Creating user $DEV_USER on $server"
+    log_message "Setting up user $DEV_USER on $server"
+    
+    # Create user and SSH directory
     ssh $ADMIN_USER@$server "sudo useradd -m -s /bin/bash $DEV_USER"
-
     ssh $ADMIN_USER@$server "sudo mkdir -p $SSH_KEY_PATH"
+    
+    # Set proper permissions
     ssh $ADMIN_USER@$server "sudo chown -R $DEV_USER:$DEV_USER $SSH_KEY_PATH"
     ssh $ADMIN_USER@$server "sudo chmod 700 $SSH_KEY_PATH"
-
+    
+    check_success "Remote user setup on $server"
 }
 
+# Function to distribute SSH public key
 distribute_pub_key() {
-
-	local server=$1
-	echo "Copying public key to $DEV_USER@$server"
-	ssh $ADMIN_USER@$server "echo '$(sudo cat $SSH_KEY_PUB)' | sudo tee -a /home/$DEV_USER/.ssh/authorized_keys &> /dev/null"
+    local server=$1
+    log_message "Distributing SSH key to $server"
+    
+    # Copy public key and set permissions
+    ssh $ADMIN_USER@$server "echo '$(sudo cat $SSH_KEY_PUB)' | sudo tee -a $SSH_KEY_PATH/authorized_keys &> /dev/null"
+    ssh $ADMIN_USER@$server "sudo chown $DEV_USER:$DEV_USER $SSH_KEY_PATH/authorized_keys"
+    ssh $ADMIN_USER@$server "sudo chmod 600 $SSH_KEY_PATH/authorized_keys"
+    
+    check_success "Key distribution to $server"
 }
 
-create_local_users_and_keys $DEV_USER
-
-for server in "${REMOTE_HOSTS[@]}"; do
-    create_dev_user_in_remote_hosts $server
-done
-
-
-for server in "${REMOTE_HOSTS[@]}"; do
-	distribute_pub_key $server
-done
-
-
-
-cat coorplanner_gotocme.pub | sudo tee -a /home/$DEV_USER/.ssh/authorized_keys
-sudo chown -R $DEV_USER:$DEV_USER /home/$DEV_USER/.ssh/authorized_keys
-
-
-
-
-
-
--------------------------------------------------------------------
-
-
-
-
-
-
-create_remote_users() {
-    local user=$1
-    sudo adduser --disabled-password --gecos "" $user
-    sudo mkdir -p /home/$user/.ssh
-    sudo touch /home/$user/.ssh/authorized_keys
-    sudo chown -R $user:$user /home/$user/.ssh
-
+# Main execution
+main() {
+    log_message "Starting user setup and key distribution"
+    
+    # Create developer group
+    create_dev_group
+    
+    # Create local user and generate keys
+    create_local_users_and_keys $DEV_USER
+    
+    # Process remote hosts
+    for server in "${REMOTE_HOSTS[@]}"; do
+        create_dev_user_in_remote_hosts $server
+        distribute_pub_key $server
+    done
+    
+    log_message "Setup completed successfully"
 }
 
-
-create_local_users_and_keys $DEV_USER
-
-create_remote_users $DEV_USER
-
-
-for RH in "${REMOTE_HOSTS[@]}"; do
-	distribute_pub_key $RH
-done
-
-
-
-
-
-
-
-
-
-
-ssh-copy-id -i /home/$user/.ssh/id_rsa.pub $REMOTE_USER@$REMOTE_HOST
-
-ssh-copy-id -i /home/gotocme/.ssh/id_rsa.pub gotocme@172.16.42.161
-
-user=gotocme
-cat ~/.ssh/id_rsa.pub
-ssh asamy@172.16.42.161 "echo '$(cat ~/.ssh/id_rsa.pub)' > ~/authorized_keys"
-ssh asamy@172.16.42.161 "cat ~/authorized_keys"
-ssh asamy@172.16.42.161 "sudo cat ~/authorized_keys >> /home/$user/.ssh/authorized_keys"
-
-ssh asamy@172.16.42.161 "cat ~/authorized_keys | sudo tee -a /home/$user/.ssh/authorized_keys &> /dev/null"
-
-ssh asamy@172.16.42.161 "echo '$(cat ~/.ssh/id_rsa.pub)' | sudo tee -a /home/$user/.ssh/authorized_keys &> /dev/null"
-
-
-
-ssh adminuser@xxx.xxx.xxx.xxx "cat ~/authorized_keys | sudo tee -a /home/$user/.ssh/authorized_keys &> /dev/null"
-bash: line 1: /home/gotocme/.ssh/authorized_keys: Permission denied
-
-for user in "${LOCAL_USERS[@]}"; do
-    create_local_users_and_keys $user
-done
+# Execute main function
+main
