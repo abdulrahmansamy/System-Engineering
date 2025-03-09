@@ -1,131 +1,135 @@
-# Creating Bootable USB Drives for Linux Distributions
+# Creating Bootable USB Drives
+
+## Table of Contents
+1. [Prerequisites](#prerequisites)
+2. [USB Drive Preparation](#usb-drive-preparation)
+3. [Creating Linux Boot Drives](#creating-linux-boot-drives)
+4. [Creating Windows Boot Drives](#creating-windows-boot-drives)
+5. [Verification](#verification)
+6. [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
-- USB drive (minimum 8GB recommended)
-- ISO image of desired Linux distribution
-- Administrative/sudo privileges
+### Required Items
+- USB drive (minimum 8GB)
+- ISO image
+- Administrative privileges
 
-## Preparation Steps
-
-### 1. Download Verification (Optional but Recommended)
+### Verification Tools
 ```bash
-# Download checksum file
+# Download and verify checksum (example for Fedora)
 wget https://download.fedoraproject.org/pub/fedora/linux/releases/39/Workstation/x86_64/iso/Fedora-Workstation-39-x86_64-CHECKSUM
-
-# Verify ISO integrity
 sha256sum -c Fedora-Workstation-39-x86_64-CHECKSUM --ignore-missing
 ```
 
-### 2. Identify USB Drive
-
-#### macOS
-```bash
-# List all disks
-diskutil list
-
-# Expected output format:
-# /dev/disk0 (internal):
-# /dev/disk2 (external, physical):
-#   #:     TYPE NAME         SIZE
-#   0:     FDisk_partition_scheme *8.0 GB
-```
-
-#### Linux
-```bash
-# List block devices
-lsblk
-
-# or using fdisk
-sudo fdisk -l
-
-# Expected output format:
-# sda      8:0    0 931.5G  0 disk
-# sdb      8:16   1   7.5G  0 disk  <- USB drive
-```
-
-## Creating Bootable USB
-
-### macOS Method
-```bash
-# 1. Unmount disk (replace disk2 with your USB device)
-diskutil unmountDisk /dev/disk2
-
-# 2. Create bootable USB (showing progress)
-sudo dd if=/path/to/distro.iso of=/dev/disk2 bs=1m status=progress
-
-# Alternative with pv for progress monitoring
-brew install pv
-pv /path/to/distro.iso | sudo dd of=/dev/disk2 bs=1m
-```
-
-### Linux Method
-```bash
-# 1. Unmount if mounted
-sudo umount /dev/sdb*
-
-# 2. Create bootable USB (showing progress)
-sudo dd if=/path/to/distro.iso of=/dev/sdb bs=4M status=progress oflag=sync
-```
-
-## Verification Steps
-
-### 1. Check Write Completion
-```bash
-# Force sync of write buffers
-sync
-
-# macOS: Verify disk
-diskutil verifyDisk /dev/disk2
-
-# Linux: Check partition table
-sudo fdisk -l /dev/sdb
-```
-
-### 2. Test USB Boot Integrity
-- Safely eject the USB drive
-- Boot from USB in test mode (if available)
-- Run media verification if provided by distro
-
-## Troubleshooting
-
-### Common Issues and Solutions
-
-1. Permission Denied
+## USB Drive Preparation
+### Device Identification
 ```bash
 # macOS
-sudo chown $(whoami):staff /dev/disk2
+diskutil list
 
 # Linux
-sudo chmod 666 /dev/sdb
+lsblk
+sudo fdisk -l
 ```
 
-2. Device Busy
+### Drive Formatting
+#### For Linux ISOs
 ```bash
-# Check what's using the device
-lsof | grep /dev/sdb
+# macOS
+diskutil eraseDisk JHFS+ "LINUX" GPT /dev/diskN
 
-# Force unmount if needed
-sudo umount -f /dev/sdb*
+# Linux
+sudo mkfs.ext4 -L "LINUX" /dev/sdX
 ```
 
-3. Write Protection
+#### For Windows ISOs
 ```bash
-# Check write protection status (Linux)
-cat /sys/class/block/sdb/ro
+# macOS
+diskutil eraseDisk MS-DOS "WINDOWS" GPT /dev/diskN
 
-# Disable write protection (if possible)
-sudo hdparm -r0 /dev/sdb
+# Linux (FAT32)
+sudo mkfs.vfat -F 32 -n "WINDOWS" /dev/sdX
+
+# Linux (exFAT for large ISOs)
+sudo mkfs.exfat -n "WINDOWS" /dev/sdX
 ```
 
-## Safety Notes
-- Double-check device identifier before writing
-- Never use the dd command on system disk
-- Keep terminal open until process completes
-- Always verify checksum before writing
-- Use status=progress to monitor operation
+## Creating Linux Boot Drives
+### Using dd Command
+```bash
+# macOS
+diskutil unmountDisk /dev/diskN
+sudo dd if=/path/to/linux.iso of=/dev/diskN bs=1m status=progress
 
-## Additional Tips
-- Use `bs=4M` for faster writes on Linux
-- Consider using `oflag=sync` for reliable writes
-- Keep USB drive formatted as FAT32 for UEFI boot
-- Test USB in multiple systems if possible
+# Linux
+sudo dd if=/path/to/linux.iso of=/dev/sdX bs=4M status=progress oflag=sync
+```
+
+## Creating Windows Boot Drives
+### Using WoeUSB
+```bash
+# Install WoeUSB
+## Debian/Ubuntu
+sudo apt install woeusb
+
+## RHEL/Fedora
+sudo dnf install WoeUSB
+
+# Create bootable USB
+sudo woeusb --target-filesystem NTFS \
+            --device windows.iso /dev/sdX
+```
+
+## Verification
+### System Checks
+```bash
+# Sync writes
+sync
+
+# Verify disk structure
+sudo fdisk -l /dev/sdX
+
+# Check filesystem
+sudo fsck.vfat /dev/sdX1  # FAT32
+sudo fsck.exfat /dev/sdX1 # exFAT
+```
+
+### Boot Testing
+1. Safe ejection procedure
+2. UEFI/BIOS boot menu access
+3. Media verification option
+4. Test boot process
+
+## Troubleshooting
+### Common Issues
+```bash
+# Permission fixes
+sudo chmod 666 /dev/sdX
+
+# Unmount busy device
+sudo umount -f /dev/sdX*
+
+# Write protection
+sudo hdparm -r0 /dev/sdX
+```
+
+## Best Practices
+1. Always verify checksums
+2. Double-check device identifier
+3. Never interrupt write process
+4. Use progress monitoring
+5. Test in target system
+6. Keep backups of important data
+
+## Quick Reference
+### Speed Optimization
+- Linux: `bs=4M`
+- macOS: `bs=1m`
+- Add `status=progress`
+- Use `oflag=sync` for reliability
+
+### Disk Formats
+- Linux: ext4/FAT32
+- Windows: FAT32/exFAT
+- UEFI: FAT32 required
+- Large ISOs (>4GB): exFAT
