@@ -1,0 +1,43 @@
+# Example terraform.tfvars file for GCP PostgreSQL HA setup
+# Copy this file to terraform.tfvars and customize the values
+
+# Required variables
+project_id = "your-gcp-project-id"
+
+# Basic configuration
+region      = "us-central1"
+zone        = "us-central1-a"
+environment = "prod"
+
+# Instance configuration
+instance_prefix = "postgresql-ha"
+machine_type    = "n2-standard-4"  # 4 vCPU, 16GB RAM for production
+
+# Disk configuration
+boot_disk_size = 50
+boot_disk_type = "pd-ssd"
+data_disk_size = 200  # Additional disk for PostgreSQL data
+data_disk_type = "pd-ssd"
+
+# Network security
+ssh_source_ranges = [
+  "10.0.0.0/8",      # Internal networks
+  "203.0.113.0/24"   # Your office IP range
+]
+
+# DNS configuration (optional)
+create_dns_zone = true
+dns_domain      = "example.com"
+
+# Monitoring and alerting
+notification_emails = [
+  "admin@example.com",
+  "dba@example.com"
+]
+
+# Backup configuration
+backup_retention_days = 90
+
+# Feature flags
+enable_monitoring = true
+enable_logging    = true
