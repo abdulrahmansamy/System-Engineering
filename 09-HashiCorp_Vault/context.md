@@ -1,0 +1,12 @@
+# Revise the following code to produce a clean, consistent, and production-grade version. Ensure:
+- Modular structure with reusable, well-named functions
+- Semantic logging with color-coded levels, timestamping, and newline control
+- Spinner/dots UX clarity for terminal feedback
+- Support for silent mode and verbosity toggles
+- Forward stdout to a log file for auditability
+- Enable verbosity for commands and forward output to the log file
+- Use log file naming convention with timestamp
+- Clear error handling with contextual messages
+- Consistent indentation, naming conventions, and inline comments for onboarding
+- Anticipate edge cases and ensure idempotency where applicable
+- Output should be readable, maintainable, and production-ready
