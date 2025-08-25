@@ -122,8 +122,8 @@ done
 
 # ─── Configuration (defaults) ─────────────────────────────────────────────────
 # (moved below parsing; removed old simple arg count check)
-remote_user="asamy"
-remote_host="172.16.42.174"
+remote_user="username"              # SSH username
+remote_host="172.00.00.00"          # SSH host or IP
 remote_path="~/vault-scripts/"
 interval=3
 max_failures=10
