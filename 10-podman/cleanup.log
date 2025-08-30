@@ -1,0 +1,6 @@
+[INFO] Operating in tag mode for tag: 'latest'
+[DEBUG] Tag 'latest' total bytes=7887306336
+[INFO] Total size of images with tag 'latest': 7.35 GB
+[INFO] Images:
+[PROMPT] Delete all images with tag 'latest'? (y/N): 
+[INFO] Deletion skipped by user.

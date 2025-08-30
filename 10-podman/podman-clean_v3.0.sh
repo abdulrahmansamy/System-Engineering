@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-
-# Purpose: Cross-platform script to calculate and optionally delete dangling Podman images
-# Flags:
-#   --dry-run        Show what would be deleted without performing deletion
+# Backward compatibility wrapper for legacy callers of podman-clean_v3.0.sh
+# Delegates to the new modular CLI: podman-clean.sh
+# Supports new 'completion' subcommand via delegation.
+SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec "$SCRIPT_DIR/podman-clean.sh" "$@"
 #   --tag TAG        Operate on images whose tag exactly matches TAG (all repositories)
 #   --repo REPO      Operate on all images belonging to repository REPO
 #   --silent         Enable silent mode (suppress output, only errors and warnings)
@@ -20,11 +21,52 @@ TARGET_TAG=""
 TARGET_REPO=""
 CLI_LOG_LEVEL=""
 LOG_FILE=""
+SUBCOMMAND=""
+
+# Exit codes:
+#   0 success
+#   1 no images found
+#   2 user aborted
+#   3 deletion failed
 
 usage() {
-    echo "Usage: $0 [--dry-run] [--repo REPOSITORY] [--tag TAG] [--silent | --verbose] [--log-file FILE]"
+    echo "Usage:"
+    echo "  $0 repo <REPOSITORY>   [--dry-run] [--silent | --verbose] [--log-file FILE]"
+    echo "  $0 tag <TAG>           [--dry-run] [--silent | --verbose] [--log-file FILE]"
+    echo "  $0 dangling            [--dry-run] [--silent | --verbose] [--log-file FILE]"
+    echo "  $0 [--repo REPOSITORY] [--tag TAG] (legacy flag mode, mutually exclusive)"
+    echo "Exit codes: 0=success 1=no-images 2=user-aborted 3=deletion-failed"
     echo "Run '$0 --help' for full help."
 }
+
+# Pre-parse subcommand (if any)
+if [[ $# -gt 0 ]]; then
+    case "$1" in
+        repo)
+            SUBCOMMAND="repo"; shift
+            if [[ $# -eq 0 || "$1" == --* ]]; then
+                echo "[ERROR] Missing repository after 'repo' subcommand" >&2; usage >&2; exit 1
+            fi
+            TARGET_REPO="$1"; shift
+            ;;
+        tag)
+            SUBCOMMAND="tag"; shift
+            if [[ $# -eq 0 || "$1" == --* ]]; then
+                echo "[ERROR] Missing tag after 'tag' subcommand" >&2; usage >&2; exit 1
+            fi
+            TARGET_TAG="$1"; shift
+            ;;
+        dangling)
+            SUBCOMMAND="dangling"; shift ;;
+        help|-h|--help)
+            # Defer to later help for full details
+            usage; exit 0 ;;
+        *)
+            # Not a subcommand; proceed with legacy flags
+            :
+            ;;
+    esac
+fi
 
 # Updated flag parsing to support --tag / --repo plus new flags
 while [[ $# -gt 0 ]]; do
@@ -50,32 +92,40 @@ while [[ $# -gt 0 ]]; do
         --log-file=*) LOG_FILE="${1#*=}"; shift ;;
         -h|--help)
             cat <<EOF
-Usage: $0 [--dry-run] [--repo REPOSITORY] [--tag TAG] [--silent | --verbose] [--log-file FILE]
+Usage:
+  $0 repo <REPOSITORY>   [--dry-run] [--silent | --verbose] [--log-file FILE]
+  $0 tag <TAG>           [--dry-run] [--silent | --verbose] [--log-file FILE]
+  $0 dangling            [--dry-run] [--silent | --verbose] [--log-file FILE]
+  $0 --repo REPOSITORY | --tag TAG (legacy flags)
 
-Modes (precedence):
-  1. --repo REPOSITORY    Operate on images of a specific repository.
-  2. --tag TAG            Operate on images whose tag equals TAG (all repositories).
-  3. (default)            Operate on dangling images.
+Modes (precedence if mixing legacy flags):
+  1. --repo / repo subcommand
+  2. --tag  / tag subcommand
+  3. dangling (default)
 
 Logging:
-  LOG_LEVEL env var accepted: ERROR,WARN,INFO,DEBUG (default INFO).
-  --silent   => WARN level (errors & warnings only).
-  --verbose  => DEBUG level (most detailed).
-  --log-file FILE records all emitted log lines (unfiltered) for audit.
-
-Convenience:
-  If --tag VALUE contains '/' and no ':', it is treated as --repo VALUE.
+  LOG_LEVEL env: ERROR,WARN,INFO,DEBUG (default INFO).
+  --silent => WARN, --verbose => DEBUG.
+  --log-file FILE collects all log lines (unfiltered).
 
 Examples:
-  $0 --repo localhost/myapp
-  $0 --tag 1.4
-  $0 --tag localhost/myapp   (interpreted as --repo localhost/myapp)
-  $0 --dry-run --repo localhost/myapp
+  $0 repo localhost/myapp
+  $0 tag 1.4 --dry-run
+  $0 dangling --silent
+  $0 --repo localhost/myapp --dry-run
 EOF
             exit 0 ;;
         *) echo "[ERROR] Unknown argument: $1" >&2; usage >&2; exit 1 ;;
     esac
 done
+
+# Validate subcommand / flag conflicts
+if [[ "$SUBCOMMAND" == "repo" && -n "$TARGET_TAG" ]]; then
+    echo "[ERROR] Cannot specify tag options with 'repo' subcommand" >&2; exit 1
+fi
+if [[ "$SUBCOMMAND" == "tag" && -n "$TARGET_REPO" ]]; then
+    echo "[ERROR] Cannot specify repo options with 'tag' subcommand" >&2; exit 1
+fi
 
 # Interpret --tag <repo> as repository filter when it resembles a repository
 if [[ -n "$TARGET_TAG" && -z "$TARGET_REPO" && "$TARGET_TAG" == */* && "$TARGET_TAG" != *":"* ]]; then
@@ -290,12 +340,13 @@ delete_dangling_images() {
 
     log_info "Deleting $(echo "$ids" | wc -l | xargs) dangling image(s)..."
     start_spinner "Deleting dangling images"
-    echo "$ids" | xargs -r podman rmi || {
+    if ! echo "$ids" | xargs -r podman rmi; then
         stop_spinner
         log_warn "Some images could not be deleted. They may be in use by containers."
-        return
-    }
+        return 3
+    fi
     stop_spinner
+    return 0
 }
 
 handle_containers_using_dangling_images() {
@@ -371,8 +422,13 @@ delete_images_by_repo() {
     [[ -z "$ids" ]] && { log "No images in repository '$TARGET_REPO' to delete."; return; }
     log_info "Deleting $(echo "$ids" | wc -l | xargs) image(s) in repository '$TARGET_REPO'..."
     start_spinner "Deleting repo images"
-    echo "$ids" | xargs -r podman rmi || log_warn "Some repository images could not be deleted (possibly in use)."
+    if ! echo "$ids" | xargs -r podman rmi; then
+        stop_spinner
+        log_warn "Some repository images could not be deleted (possibly in use)."
+        return 3
+    fi
     stop_spinner
+    return 0
 }
 
 # Revised: calculate total size for images matching a tag (across repositories) with delimiter
@@ -398,8 +454,13 @@ delete_images_by_tag() {
     [[ -z "$ids" ]] && { log "No images with tag '$TARGET_TAG' to delete."; return; }
     log_info "Deleting $(echo "$ids" | wc -l | xargs) image(s) tagged '$TARGET_TAG'..."
     start_spinner "Deleting tagged images"
-    echo "$ids" | xargs -r podman rmi || log_warn "Some tagged images could not be deleted (possibly in use)."
+    if ! echo "$ids" | xargs -r podman rmi; then
+        stop_spinner
+        log_warn "Some tagged images could not be deleted (possibly in use)."
+        return 3
+    fi
     stop_spinner
+    return 0
 }
 
 main() {
@@ -409,7 +470,7 @@ main() {
         total_bytes=$(calculate_total_size_by_repo)
         if (( total_bytes == 0 )); then
             log_info "No images found in repository '$TARGET_REPO'."
-            exit 0
+            exit 1
         fi
         human_size=$(format_human_size "$total_bytes")
         log_info "Total size of images in repository '$TARGET_REPO': $human_size"
@@ -422,11 +483,14 @@ main() {
         log_ask "Delete all images in repository '$TARGET_REPO'? (y/N): "
         read -r confirm
         if [[ "$confirm" =~ ^[Yy]$ ]]; then
-            delete_images_by_repo
+            if ! delete_images_by_repo; then
+                exit 3
+            fi
+            exit 0
         else
             log_info "Deletion skipped by user."
+            exit 2
         fi
-        exit 0
     fi
 
     # Tag mode
@@ -435,7 +499,7 @@ main() {
         total_bytes=$(calculate_total_size_by_tag)
         if (( total_bytes == 0 )); then
             log_info "No images found with tag '$TARGET_TAG'."
-            exit 0
+            exit 1
         fi
         human_size=$(format_human_size "$total_bytes")
         log_info "Total size of images with tag '$TARGET_TAG': $human_size"
@@ -448,21 +512,23 @@ main() {
         log_ask "Delete all images with tag '$TARGET_TAG'? (y/N): "
         read -r confirm
         if [[ "$confirm" =~ ^[Yy]$ ]]; then
-            delete_images_by_tag
+            if ! delete_images_by_tag; then
+                exit 3
+            fi
+            exit 0
         else
             log_info "Deletion skipped by user."
+            exit 2
         fi
-        exit 0
     fi
 
+    # Dangling mode
     log_info "Checking for dangling Podman images..."
     total_bytes=$(calculate_total_size)
-
     if (( total_bytes == 0 )); then
         log_info "No dangling images found."
-        exit 0
+        exit 1
     fi
-
     human_size=$(format_human_size "$total_bytes")
     log_info "Total size of dangling images: $human_size"
     log_info "Dangling images:"
@@ -476,18 +542,16 @@ main() {
         log_info "Dry run enabled. No images will be deleted."
         exit 0
     fi
-
     log_ask "Do you want to delete dangling images? (y/N): "
     read -r confirm
     if [[ "$confirm" =~ ^[Yy]$ ]]; then
-        delete_dangling_images
+        if ! delete_dangling_images; then
+            exit 3
+        fi
+        exit 0
     else
         log_info "Image cleanup skipped by user."
+        exit 2
     fi
 }
-
-main
-    fi
-}
-
 main
