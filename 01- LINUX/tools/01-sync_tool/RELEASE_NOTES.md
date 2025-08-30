@@ -7,6 +7,7 @@
 - **Intelligent Sync Methods**: Auto-detects rsync availability with tar+scp fallback
 - **Recursive Monitoring**: Monitors all files within directories for changes
 - **Smart Permissions**: Automatically sets executable permissions for shell scripts in synced directories
+- **Binary Distribution**: Added Makefile and build script for creating compiled binaries using shc
 
 ### 🔧 Technical Improvements
 - **Enhanced Checksum Calculation**: 
@@ -17,12 +18,14 @@
   - Fallback: tar+scp method when rsync unavailable on remote host
 - **Unified Target Handling**: Single parameter accepts both files and directories
 - **Backward Compatibility**: Maintains all v1.2 functionality for file sync
+- **Binary Compilation**: Support for creating standalone executables with shc
 
 ### 🎨 User Experience
 - **Automatic Type Detection**: Script detects file vs directory and adjusts behavior
 - **Enhanced Monitoring Display**: Shows target type (file/directory) in progress messages
 - **Improved Error Messages**: Clearer feedback for different sync methods and failures
 - **Seamless Fallback**: Transparent switching between sync methods on failure
+- **Easy Binary Creation**: Simple `make` or `./build.sh` commands to create binaries
 
 ### 🔒 Reliability
 - **Robust Directory Sync**: Handles missing rsync gracefully with tar+scp fallback
@@ -48,12 +51,46 @@
 
 # With custom config
 ./sync_on_change_v1.3.sh my_project/ -c /path/to/config.conf
+
+# Using compiled binary
+./sync_on_change my_project/ -v
 ```
+
+### 🔨 Binary Creation
+Create standalone executable binaries using the included build tools:
+
+```bash
+# Install shc compiler (required)
+sudo apt-get install shc  # Ubuntu/Debian
+sudo yum install shc      # CentOS/RHEL
+
+# Build all versions
+make all
+
+# Build latest version only
+make binaries
+
+# Create distribution package
+make dist
+
+# Install to system
+make install
+
+# Using build script for advanced options
+./build.sh --latest --optimize --dist --install
+```
+
+The binary creation process:
+- Compiles Bash scripts into standalone executables using shc
+- Creates optimized binaries with stripped symbols
+- Packages binaries with configuration templates and documentation
+- Supports system-wide installation
 
 ### 🔄 Migration from v1.2
 - **Zero Changes Required**: All v1.2 usage patterns work unchanged
 - **New Capability**: Simply pass a directory path instead of file path
 - **Same Config**: No configuration file updates needed
+- **Binary Option**: Optionally compile to binary for faster execution and distribution
 
 ### 🐛 Bug Fixes
 - Fixed directory sync when rsync not available on remote host
@@ -148,5 +185,5 @@ No breaking changes - existing config files and usage patterns remain compatible
 New verbose mode is opt-in via `-v` flag.
 
 ---
-*v1.3: Major expansion with directory sync capabilities and intelligent fallback mechanisms.*  
+*v1.3: Major expansion with directory sync capabilities, intelligent fallback mechanisms, and binary compilation support.*  
 *v1.2: Complete architectural overhaul focused on maintainability, reliability, and user experience.*
