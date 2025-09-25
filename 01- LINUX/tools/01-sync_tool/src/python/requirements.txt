@@ -1,0 +1,3 @@
+paramiko
+watchdog
+pyinstaller

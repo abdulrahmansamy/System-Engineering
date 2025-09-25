@@ -17,8 +17,8 @@
 # ---------------------------------------------------------------------------
 
 # --- Remote Connection -------------------------------------------------------
-remote_user="asamy"           # SSH username
-remote_host="172.16.42.179"       # SSH host or IP
+remote_user="username"           # SSH username
+remote_host="xxx.xxx.xxx.xxx"       # SSH host or IP
 # remote_path="~/scripts/"   # Destination directory (must exist or be creatable)
 
 # --- Behavior ----------------------------------------------------------------
