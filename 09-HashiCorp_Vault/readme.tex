@@ -1,0 +1,280 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in,headheight=30pt,footskip=37pt]{geometry}
+\usepackage{fontspec}
+\usepackage{longtable,booktabs}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titling}
+\usepackage{array}
+\usepackage{graphicx}
+
+% Font Configuration - STC Forward with fallback
+\IfFontExistsTF{STC Forward}{
+  \setmainfont{STC Forward}
+}{
+  \setmainfont{Arial}
+}
+
+% Set monospace font with system fallbacks
+\IfFontExistsTF{Monaco}{
+  \setmonofont{Monaco}[Scale=0.85]
+}{
+  \IfFontExistsTF{Menlo}{
+    \setmonofont{Menlo}[Scale=0.85]
+  }{
+    \setmonofont{Latin Modern Mono}[Scale=0.85]
+  }
+}
+
+
+% Brand Colors - Solutions.com.sa
+\definecolor{solutionsblue}{HTML}{0066CC}
+\definecolor{solutionsgray}{HTML}{666666}
+\definecolor{solutionslight}{HTML}{E6F2FF}
+
+% Brand Identity Macro
+\newcommand{\solutionsbrand}{\textcolor{solutionsblue}{\textbf{solutions.com.sa}}}
+
+% Header/Footer Configuration
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{solutionsgray}{HashiCorp Vault Automation}}
+\fancyhead[R]{\small\textcolor{solutionsblue}{\textbf{solutions.com.sa}} \quad \includegraphics[width=2cm]{logo.pdf}}
+\fancyfoot[L]{\small\textcolor{solutionsgray}{www.solutions.com.sa}}
+\fancyfoot[C]{\small\textcolor{solutionsgray}{\thepage}}
+\fancyfoot[R]{\small\textcolor{solutionsgray}{Infrastructure Solutions}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.5pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{solutionsblue}\leaders\hrule height \headrulewidth\hfill}}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{solutionsblue}\leaders\hrule height \footrulewidth\hfill}}
+
+\hypersetup{colorlinks=true,linkcolor=solutionsblue,urlcolor=solutionsblue,breaklinks=true}
+
+\lstdefinelanguage{bash}{
+  morekeywords={export,if,then,fi,for,do,done,while},
+  sensitive=true
+}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  showstringspaces=false,
+  frame=single,
+  columns=fullflexible,
+  breaklines=true,
+  breakatwhitespace=true
+}
+
+\title{\textcolor{solutionsblue}{\textbf{Enterprise HashiCorp Vault Automation}} \\
+       \Large\textcolor{solutionsgray}{Podman Deployment \& Intelligent File Sync Solutions} \\
+       \vspace{0.5cm}
+       \large Powered by \solutionsbrand}
+\author{\textcolor{solutionsgray}{Infrastructure Automation Division}}
+\date{\textcolor{solutionsgray}{\today}}
+
+% Title Page Styling
+\pretitle{\begin{center}\color{solutionsblue}\LARGE\bfseries}
+\posttitle{\par\end{center}\vspace{0.5cm}{\color{solutionsblue}\rule{\linewidth}{2pt}}\vspace{1cm}}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+\section*{Abstract}
+This document summarizes a single-node HashiCorp Vault deployment automated with Podman plus a helper script (\texttt{sync\_on\_change\_clean.sh}) that watches a local file, securely syncing changes to a remote host. The watcher now supports layered configuration precedence and per-variable source reporting.
+
+\section*{Brand Alignment}
+This automation solution reflects \solutionsbrand{}'s commitment to enterprise-grade infrastructure automation. Our approach emphasizes:
+\begin{itemize}
+  \item \textcolor{solutionsblue}{\textbf{Security First}}: TLS-enabled deployments with certificate management
+  \item \textcolor{solutionsblue}{\textbf{Operational Excellence}}: Automated deployment with comprehensive health monitoring
+  \item \textcolor{solutionsblue}{\textbf{Intelligent Automation}}: Smart file synchronization with configurable precedence
+  \item \textcolor{solutionsblue}{\textbf{Enterprise Ready}}: Production-focused with secure defaults and validation
+\end{itemize}
+
+For additional infrastructure solutions and consulting services, visit\\
+\href{https://www.solutions.com.sa}{\textcolor{solutionsblue}{\textbf{www.solutions.com.sa}}}.
+
+\section{Overview}
+\begin{itemize}
+  \item Installs / verifies Podman (and optionally Vault CLI).
+  \item Prepares directory structure under \texttt{\$HOME/vault-server}.
+  \item Generates (or reuses) a self-signed TLS certificate.
+  \item Optionally trusts the certificate system-wide.
+  \item Applies secure filesystem permissions (with permissive fallback).
+  \item Writes \texttt{config.hcl} using file storage backend + TLS listener.
+  \item Optionally validates the configuration.
+  \item Manages firewall openings (unless disabled).
+  \item Starts or replaces the Vault container and polls health.
+\end{itemize}
+
+\section{Quick Start (Non-Interactive)}
+\begin{lstlisting}[language=bash]
+TRUST_CERT=1 INSTALL_CLI=1 ./prod/install_vault_container_prod-moduler-version-clean-working.sh
+\end{lstlisting}
+If the certificate is not trusted:
+\begin{lstlisting}[language=bash]
+export VAULT_ADDR=https://127.0.0.1:8200
+export VAULT_SKIP_VERIFY=1   # Dev only; prefer --cacert
+\end{lstlisting}
+
+\section{Initialize \& Unseal}
+\begin{lstlisting}[language=bash]
+vault operator init
+vault operator unseal
+vault status
+\end{lstlisting}
+
+\section{Core Environment Variables}
+\footnotesize
+\begin{longtable}{@{}p{3.5cm}p{4.5cm}p{2.5cm}@{}}
+\toprule
+Variable & Purpose & Default \\
+\midrule
+\endhead
+VAULT\_VERSION & Vault image tag & \texttt{latest} \\
+VAULT\_PORT & API listen port & 8200 \\
+VAULT\_CLUSTER\_PORT & Cluster port & 8201 \\
+VAULT\_API\_ADDR & Advertised API & \texttt{https://127.0.0.1:8200} \\
+INSTALL\_CLI & Install Vault CLI (1=yes) & 0 \\
+TRUST\_CERT / TRUST\_VAULT\_CERT & Trust self-signed cert & 0 \\
+PERMISSIVE\_STORAGE & Force wide-open perms & 0 \\
+FIREWALL\_DISABLE & Skip firewall changes & 0 \\
+CHECK\_VAULT\_CONFIG & Run \texttt{-check-config} & 1 \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\section{Directory Layout}
+\begin{lstlisting}
+$HOME/vault-server/
+  data/
+    certs/
+      public.crt
+      private.key
+    storage/
+  config/
+    config.hcl
+\end{lstlisting}
+
+\section{Container Mounts}
+\begin{verbatim}
+/data   -> data + certs
+/config -> configuration
+\end{verbatim}
+
+\section{Health \& Status}
+\begin{lstlisting}[language=bash]
+curl --cacert $HOME/vault-server/data/certs/public.crt https://127.0.0.1:8200/v1/sys/health
+# Dev only:
+curl -k https://127.0.0.1:8200/v1/sys/health
+podman logs vault | head
+podman exec vault vault status -tls-skip-verify
+\end{lstlisting}
+Return codes:
+\begin{itemize}
+  \item 501 = uninitialized
+  \item 503 = sealed
+\end{itemize}
+
+\section{Updating Vault}
+\begin{lstlisting}[language=bash]
+VAULT_VERSION=1.20.2 ./prod/install_vault_container_prod-moduler-version-clean-working.sh
+\end{lstlisting}
+Omit \texttt{VAULT\_VERSION} to keep \texttt{latest}.
+
+\section{Clean Removal}
+Script:
+\begin{lstlisting}[language=bash]
+./clean_vault_script.sh          # interactive
+./clean_vault_script.sh -f       # forced
+CLEAN_IMAGE=1 CLEAN_CLI=1 ./clean_vault_script.sh -f
+\end{lstlisting}
+Manual:
+\begin{lstlisting}[language=bash]
+podman rm -f vault
+rm -rf $HOME/vault-server
+\end{lstlisting}
+
+\section{Security Notes}
+\begin{itemize}
+  \item Replace self-signed cert in production.
+  \item File storage backend is single-node; use Raft/external for HA.
+  \item Avoid permissive permissions outside dev.
+  \item Protect unseal keys and root token.
+  \item Pin explicit Vault versions.
+\end{itemize}
+
+\section{Troubleshooting}
+\footnotesize
+\begin{longtable}{@{}p{3.5cm}p{7.5cm}@{}}
+\toprule
+Symptom & Action \\
+\midrule
+\endhead
+Startup timeout & \texttt{podman logs vault} (check TLS, perms, mlock) \\
+Certificate errors & Use \texttt{TRUST\_CERT=1} or \texttt{--cacert} \\
+Port in use & \texttt{ss -tulnp | grep ':8200'} then free or override \\
+501 health & Initialize (\texttt{vault operator init}) \\
+503 health & Unseal (\texttt{vault operator unseal}) \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\section{Watcher: \texttt{sync\_on\_change\_clean.sh}}
+Purpose: monitor a single local file, detect content changes (SHA-256), scp it to a remote host, and set execute permission remotely.
+
+\subsection*{Usage}
+\begin{lstlisting}[language=bash]
+./sync_on_change_clean.sh <file> [-c <config-file>] [-h]
+\end{lstlisting}
+
+\subsection*{Examples}
+\begin{lstlisting}[language=bash]
+./sync_on_change_clean.sh prod/install_vault_container_prod-moduler-version-clean-working.sh
+./sync_on_change_clean.sh prod/install_vault_container_prod-moduler-version-clean-working.sh -c ./sync_on_change.conf
+\end{lstlisting}
+
+\subsection*{Configuration Precedence (first found wins)}
+\begin{enumerate}
+  \item \texttt{-c <config-file>} (explicit; must exist; no fallback)
+  \item \texttt{<script\_dir>/sync\_on\_change.conf}
+  \item \texttt{\$PWD/.sync\_on\_change.conf}
+  \item \texttt{<script\_dir>/.sync\_on\_change.conf}
+  \item \texttt{<watched\_file\_dir>/.sync\_on\_change.conf}
+\end{enumerate}
+
+\subsection*{Overridable Variables}
+\begin{itemize}
+  \item \texttt{remote\_user}
+  \item \texttt{remote\_host}
+  \item \texttt{remote\_path}
+  \item \texttt{interval}
+  \item \texttt{max\_failures}
+\end{itemize}
+
+\subsection*{Startup Reporting}
+The script prints each variable along with its source (default vs the config file path).
+
+\subsection*{Sample Configuration File}
+\begin{lstlisting}[language=bash]
+# sync_on_change.conf
+remote_user="username"
+remote_host="172.00.00.00"
+remote_path="~/vault-scripts/"
+interval=2
+max_failures=15
+\end{lstlisting}
+
+\section{Minimal Workflow}
+\begin{verbatim}
+Run install script -> vault operator init -> vault operator unseal
+Set VAULT_ADDR -> use Vault
+\end{verbatim}
+
+\section{Production Reminders}
+Harden TLS, use HA backend, secure unseal keys, pin versions, monitor logs.
+
+\end{document}
