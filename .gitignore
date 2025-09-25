@@ -4,3 +4,5 @@
 .trash
 .old_versions
 trash/
+.trash/
+prompt*.md
