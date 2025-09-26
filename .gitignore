@@ -12,3 +12,4 @@ prompt*.md
 */**/variables.tf
 *.tfstate
 */**/.terraform/
+.terraform/
