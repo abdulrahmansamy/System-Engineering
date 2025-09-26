@@ -7,3 +7,6 @@ trash/
 .trash/
 prompt*.md
 *context*
+*/**/*.tfvars
+*/**/*.log
+*/**/variables.tf
