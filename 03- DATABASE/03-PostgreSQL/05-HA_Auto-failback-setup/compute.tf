@@ -12,7 +12,7 @@ variable "timezone" {
 variable "ha_pg_script_url" {
   description = "URL of the main HA PostgreSQL bootstrap script"
   type        = string
-  default     = "https://raw.githubusercontent.com/abdulrahmansamy/System-Engineering/master/ha_postgresql_setup.sh"
+  default     = "https://raw.githubusercontent.com/abdulrahmansamy/System-Engineering/refs/heads/master/03-%20DATABASE/03-PostgreSQL/05-HA_Auto-failback-setup/scripts/ha_postgresql_setup.sh"
 }
 
 variable "pg_cluster_id" {
@@ -25,7 +25,7 @@ locals {
   # Map environment string to short code used in names
   env_code = contains([lower(var.ha_db_environment)], "production") ? "prd" : (contains([lower(var.ha_db_environment)], "nonprod") ? "nprd" : lower(substr(var.ha_db_environment, 0, 4)))
 
-  org_code = "ipa"
+  org_code = var.org_code
 
   # Base purpose names
   purpose = {
