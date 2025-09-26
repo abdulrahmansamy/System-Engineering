@@ -10,3 +10,5 @@ prompt*.md
 */**/*.tfvars
 */**/*.log
 */**/variables.tf
+*.tfstate
+*/**/.terraform/
