@@ -1,7 +1,7 @@
 locals {
   app_labels = {
     environment = var.ha_db_environment
-    project     = var.project_id
+    project     = var.prod_db_project_id
     managed-by  = "terraform"
     stack       = "pg-ha-pg_auto_failover"
   }
