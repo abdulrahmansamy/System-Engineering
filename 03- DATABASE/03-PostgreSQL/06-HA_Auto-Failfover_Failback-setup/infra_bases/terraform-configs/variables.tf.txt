@@ -1,0 +1,481 @@
+variable "billing_account" {
+  description = "The ID of the billing account to associate projects with"
+  type        = string
+  default     = "019EDF-78F6FA-3B05B7"
+}
+
+variable "org_id" {
+  description = "The ID of the Google Cloud organization"
+  type        = string
+  default     = "31205800099" # Replace with your actual org ID if needed
+}
+
+variable "billing_project" {
+  description = "The project id to use for billing"
+  type        = string
+  default     = "cs-host-56eeee89dc394448ab88d8"
+}
+
+# variable "folders" {
+#   description = "Folder structure as a map"
+#   type        = map(any)
+# }
+
+variable "project_id" {
+  description = "The ID of the GCP project to deploy resources"
+  type        = string
+}
+
+variable "terraform_user_email" {
+  description = "Email of the operator running Terraform (for IAM bindings or notifications, if needed)"
+  type        = string
+  default     = ""
+}
+
+variable "nonprod_app_project_id" {
+  description = "The ID of the non-production application project"
+  type        = string
+  default     = "ipa-nprd-svc-app-01"
+}
+
+variable "nonprod_db_project_id" {
+  description = "The ID of the non-production database project"
+  type        = string
+  default     = "ipa-nprd-svc-db-01"
+}
+
+variable "prod_app_project_id" {
+  description = "The ID of the production application project"
+  type        = string
+  default     = "ipa-prd-svc-app-01"
+}
+
+variable "prod_db_project_id" {
+  description = "The ID of the production database project"
+  type        = string
+  default     = "ipa-prd-svc-db-01"
+}
+
+variable "host_project_id" {
+  description = "The ID of the host project for shared VPC"
+  type        = string
+  default     = "ipa-host-prj-01"
+}
+
+variable "nonprod_pod_cidr" {
+  description = "CIDR range for non-production GKE pods"
+  type        = string
+  default     = "10.10.0.0/16"
+}
+
+variable "prod_pod_cidr" {
+  description = "CIDR range for production GKE pods"
+  type        = string
+  default     = "10.30.0.0/16"
+}
+
+variable "nonprod_services_cidr" {
+  description = "CIDR range for non-production GKE services"
+  type        = string
+  default     = "10.20.0.0/16"
+}
+
+variable "prod_services_cidr" {
+  description = "CIDR range for production GKE services"
+  type        = string
+  default     = "10.40.0.0/16"
+}
+
+variable "nonprod_db_subnet_cidr" {
+  description = "CIDR range for non-production database subnet"
+  type        = string
+  default     = "192.168.14.0/23"
+}
+
+variable "prod_db_subnet_cidr" {
+  description = "CIDR range for production database subnet"
+  type        = string
+  default     = "192.168.24.0/23"
+}
+
+variable "nonprod_gke_master_cidr" {
+  description = "CIDR range for non-production GKE master nodes"
+  type        = string
+  default     = "192.168.32.16/28"
+}
+
+variable "prod_gke_master_cidr" {
+  description = "CIDR range for production GKE master nodes"
+  type        = string
+  default     = "192.168.32.0/28"
+}
+
+variable "nonprod_app_subnet_cidr" {
+  description = "CIDR range for non-production application subnet (Node IP Range)"
+  type        = string
+  default     = "192.168.10.0/22"
+}
+
+variable "prod_app_subnet_cidr" {
+  description = "CIDR range for production application subnet (Node IP Range)"
+  type        = string
+  default     = "192.168.20.0/22"
+}
+
+variable "shared_vpc_network_id" {
+  description = "The ID of the shared VPC network"
+  type        = string
+  default     = "ipa-vpc-shared-01"
+}
+
+variable "nonprod_application_subnet_id" {
+  description = "ID of the non-production application subnet"
+  type        = string
+  default     = "ipa-nprd-snet-app-01"
+}
+
+variable "nonprod_database_subnet_id" {
+  description = "ID of the non-production database subnet"
+  type        = string
+  default     = "ipa-nprd-snet-db-01"
+}
+
+variable "prod_application_subnet_id" {
+  description = "ID of the production application subnet"
+  type        = string
+  default     = "ipa-prd-snet-app-01"
+}
+
+variable "prod_database_subnet_id" {
+  description = "ID of the production database subnet"
+  type        = string
+  default     = "ipa-prd-snet-db-01"
+}
+
+variable "nonprod_gke_cluster_id" {
+  description = "ID of the non-production GKE cluster"
+  type        = string
+  default     = "ipa-nprd-gke-app-01"
+}
+
+variable "prod_gke_cluster_id" {
+  description = "ID of the production GKE cluster"
+  type        = string
+  default     = "ipa-prd-gke-app-01"
+}
+
+variable "filestore_ip_range" {
+  description = "IP range for Filestore instance"
+  type        = string
+  default     = "192.168.50.0/29"
+}
+
+variable "private_service_access_range" {
+  description = "IP range for Private Service Access"
+  type        = string
+  default     = "10.100.0.0/16"
+}
+
+variable "cloud_setup_host_project_id" {
+  description = "The ID of the host project for cloud setup"
+  type        = string
+  default     = "cs-host-56eeee89dc394448ab88d8"
+}
+
+variable "storage_bucket_location" {
+  description = "Location for the storage bucket"
+  type        = string
+  default     = "ME-CENTRAL2"
+}
+
+variable "org_admins_group" {
+  description = "The ID of the organization admins group"
+  type        = string
+  default     = "gcp-organization-admins@nominations.ipa.edu.sa"
+}
+
+variable "security_admins_group" {
+  description = "The ID of the security admins group"
+  type        = string
+  default     = "gcp-security-admins@nominations.ipa.edu.sa"
+}
+
+variable "external_admins_group" {
+  description = "The ID of the external admin team group"
+  type        = string
+  default     = "external-admins@nominations.ipa.edu.sa"
+}
+
+variable "external_devs_group" {
+  description = "The ID of the external developer team group"
+  type        = string
+  default     = "external-dev-team@nominations.ipa.edu.sa"
+}
+
+variable "region" {
+  description = "Location for the resources"
+  type        = string
+  default     = "me-central2"
+}
+
+variable "monitoring_notification_channels" {
+  description = "List of Monitoring notification channel IDs to attach to alert policies"
+  type        = list(string)
+  default     = []
+}
+
+variable "replication_lag_threshold_seconds" {
+  description = "Threshold in seconds for replication WAL lag alerts."
+  type        = number
+  default     = 0.5
+}
+
+
+variable "audit_logs_retention_days" {
+  description = "Retention period (days) for audit logs bucket"
+  type        = number
+  default     = 365
+}
+
+variable "ops_agent_logs_retention_days" {
+  description = "Retention period (days) for ops agent and system logs bucket"
+  type        = number
+  default     = 90
+}
+
+variable "ha_db_primary_zone" {
+  description = "High Availability Primary zone for PostgreSQL"
+  type        = string
+  default     = "me-central2-a"
+}
+
+variable "ha_db_secondary_zone" {
+  description = "High Availability Secondary zone for PostgreSQL"
+  type        = string
+  default     = "me-central2-b"
+}
+
+variable "ha_db_monitor_zone" {
+  description = "High Availability Monitor zone for pg_auto_failover monitor"
+  type        = string
+  default     = "me-central2-c"
+}
+
+variable "ha_db_environment" {
+  description = "Environment name (prod/nonprod, or production/nonproduction, or prd/nprd)"
+  type        = string
+  default     = "production"
+}
+
+variable "ha_db_instance_prefix" {
+  description = "Prefix for instance names"
+  type        = string
+  default     = "ipa-prd-psql"
+}
+
+variable "ha_db_machine_type" {
+  description = "Machine type for PostgreSQL instances"
+  type        = string
+  default     = "n2-standard-64"
+}
+
+variable "ha_db_monitor_machine_type" {
+  description = "Monitor machine type for PostgreSQL instances"
+  type        = string
+  default     = "n2-standard-6"
+}
+
+variable "ha_db_boot_disk_size" {
+  description = "Boot disk size in GB"
+  type        = number
+  default     = 100 # 100GB
+
+  validation {
+    condition     = var.ha_db_boot_disk_size >= 20 && var.ha_db_boot_disk_size <= 1024
+    error_message = "Boot disk size must be between 20GB and 1024GB."
+  }
+}
+
+variable "ha_db_boot_disk_type" {
+  description = "Boot disk type"
+  type        = string
+  default     = "pd-ssd"
+
+  validation {
+    condition     = contains(["pd-standard", "pd-ssd", "pd-balanced"], var.ha_db_boot_disk_type)
+    error_message = "Boot disk type must be one of: pd-standard, pd-ssd, pd-balanced."
+  }
+}
+
+variable "ha_db_data_disk_type" {
+  description = "Data disk type"
+  type        = string
+  default     = "pd-ssd"
+
+  validation {
+    condition     = contains(["pd-standard", "pd-ssd", "pd-balanced"], var.ha_db_data_disk_type)
+    error_message = "Data disk type must be one of: pd-standard, pd-ssd, pd-balanced."
+  }
+}
+
+variable "ha_db_data_disk_size" {
+  description = "Data disk size in GB"
+  type        = number
+  default     = 10240 # 10TB
+
+  validation {
+    condition     = var.ha_db_data_disk_size >= 100 && var.ha_db_data_disk_size <= 100000
+    error_message = "Data disk size must be between 100GB and 100TB."
+  }
+}
+
+variable "ha_db_wal_disk_size" {
+  description = "WAL disk size in GB"
+  type        = number
+  default     = 512 # 512GB
+
+  validation {
+    condition     = var.ha_db_wal_disk_size >= 100 && var.ha_db_wal_disk_size <= 1024
+    error_message = "WAL disk size must be between 100GB and 1024GB."
+  }
+}
+
+variable "ha_db_monitor_data_disk_size" {
+  description = "Monitor data disk size in GB"
+  type        = number
+  default     = 200 # 200GB
+
+  validation {
+    condition     = var.ha_db_monitor_data_disk_size >= 100 && var.ha_db_monitor_data_disk_size <= 1024
+    error_message = "Monitor data disk size must be between 100GB and 1024GB."
+  }
+}
+
+
+
+variable "ssh_source_ranges" {
+  description = "Source IP ranges for SSH access"
+  type        = list(string)
+  default     = ["192.168.24.0/23"]
+}
+
+variable "create_ha_dns_zone" {
+  description = "Whether to create a Cloud DNS zone for HA PostgreSQL"
+  type        = bool
+  default     = false
+}
+
+variable "ha_db_dns_domain" {
+  description = "DNS domain for HA PostgreSQL private dns zone"
+  type        = string
+  default     = "ha_db.internal.ipa.edu.sa"
+}
+
+variable "dns_domain" {
+  description = "DNS domain for HA PostgreSQL"
+  type        = string
+  default     = "ipa.edu.sa"
+}
+
+variable "internal_dns_domain" {
+  description = "DNS domain for HA PostgreSQL"
+  type        = string
+  default     = "internal.ipa.edu.sa"
+}
+
+
+variable "notification_emails" {
+  description = "Email addresses for monitoring notifications"
+  type        = list(string)
+  default     = []
+}
+
+variable "ha_db_backup_retention_days" {
+  description = "Number of days to retain backups"
+  type        = number
+  default     = 90
+
+  validation {
+    condition     = var.ha_db_backup_retention_days >= 7 && var.ha_db_backup_retention_days <= 365
+    error_message = "Backup retention must be between 7 and 365 days."
+  }
+}
+
+variable "ha_db_enable_monitoring" {
+  description = "Enable Cloud Monitoring and alerting"
+  type        = bool
+  default     = true
+}
+
+variable "ha_db_enable_logging" {
+  description = "Enable Cloud Logging for PostgreSQL"
+  type        = bool
+  default     = true
+}
+
+variable "repmgr_password" {
+  type        = string
+  sensitive   = true
+  description = "Password for the repmgr user in PostgreSQL"
+  default     = "ChangeThisToASecurePassword!"
+}
+
+variable "pg_primary_ip" {
+  description = "Static internal IP address for the primary PostgreSQL instance"
+  type        = string
+  default     = "192.168.24.21"
+}
+
+variable "pg_standby_ip" {
+  description = "Static internal IP address for the standby PostgreSQL instance"
+  type        = string
+  default     = "192.168.24.22"
+}
+
+variable "pg_monitor_ip" {
+  description = "Static internal IP address for the monitoring instance"
+  type        = string
+  default     = "192.168.24.23"
+}
+
+variable "pg_vip_ip" {
+  description = "Static internal IP address for the PostgreSQL VIP"
+  type        = string
+  default     = "192.168.24.24"
+}
+
+variable "ubuntu_minimal_2404_image" {
+  description = "The Ubuntu minimal image to use for PostgreSQL instances"
+  type        = string
+  default     = "projects/ubuntu-os-cloud/global/images/ubuntu-minimal-2404-noble-amd64-v20250918"
+}
+
+variable "org_code" {
+  description = "Organization code used in resource naming"
+  type        = string
+  default     = "ipa"
+}
+
+variable "timezone" {
+  description = "Instance timezone to set via metadata"
+  type        = string
+  default     = "Asia/Riyadh"
+}
+
+# variable "pg_cluster_id" {
+#   description = "Identifier for the pg_auto_failover cluster"
+#   type        = string
+#   default     = format("%s-ha-cluster-01", contains(["prod", "production", "prd"], lower(var.ha_db_environment)) ? "prod" : "nonprod")
+# }
+
+variable "db_host_ids" {
+  description = "Host IDs for database instances"
+  type        = map(number)
+  default = {
+    primary = 21
+    standby = 22
+    monitor = 23
+    vip     = 24
+  }
+}
+

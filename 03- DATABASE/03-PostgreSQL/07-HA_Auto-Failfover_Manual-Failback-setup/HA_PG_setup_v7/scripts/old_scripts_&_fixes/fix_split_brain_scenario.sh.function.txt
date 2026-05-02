@@ -1,0 +1,302 @@
+# Fix split-brain scenario where both nodes think they're standbys
+fix_split_brain_scenario() {
+    section "Fix Split-Brain Scenario"
+    
+    warn "🚨 SPLIT-BRAIN RECOVERY - Both nodes appear to be in standby mode"
+    info "This will:"
+    info "1. Choose one node to be the definitive primary"
+    info "2. Promote it properly"
+    info "3. Fix the other node as a proper standby"
+    info "4. Re-establish replication"
+    echo
+    
+    # Check current actual status
+    local primary_recovery_status standby_recovery_status
+    primary_recovery_status=$(timeout 5 env PGPASSWORD="$PG_SUPER_PASS" psql -h "$PRIMARY_IP" -p "$DB_PORT" -U "$USERNAME" -d "$DATABASE" -Atqc "SELECT pg_is_in_recovery();" 2>/dev/null || echo "UNREACHABLE")
+    standby_recovery_status=$(timeout 5 env PGPASSWORD="$PG_SUPER_PASS" psql -h "$STANDBY_IP" -p "$DB_PORT" -U "$USERNAME" -d "$DATABASE" -Atqc "SELECT pg_is_in_recovery();" 2>/dev/null || echo "UNREACHABLE")
+    
+    info "Current recovery status:"
+    info "  • 192.168.14.21 (original primary): pg_is_in_recovery = $primary_recovery_status"
+    info "  • 192.168.14.22 (original standby): pg_is_in_recovery = $standby_recovery_status"
+    
+    if [[ "$primary_recovery_status" == "t" && "$standby_recovery_status" == "t" ]]; then
+        warn "🚨 CONFIRMED: Both nodes are in recovery mode (standby state)"
+        info "This is a split-brain scenario - we need to promote one node"
+    else
+        error "This is not the expected split-brain scenario"
+        return 1
+    fi
+    
+    echo
+    info "Choose which node should become the PRIMARY:"
+    echo "  1) 192.168.14.21 (original primary) - RECOMMENDED"
+    echo "  2) 192.168.14.22 (original standby)"
+    echo "  3) Cancel operation"
+    
+    read -p "❓ Select option (1-3): " choice
+    
+    local chosen_primary_ip chosen_primary_ssh chosen_standby_ip chosen_standby_ssh
+    
+    case "$choice" in
+        1)
+            chosen_primary_ip="$PRIMARY_IP"
+            chosen_primary_ssh="$PRIMARY_SSH_HOST"
+            chosen_standby_ip="$STANDBY_IP"
+            chosen_standby_ssh="$STANDBY_SSH_HOST"
+            info "✅ Selected 192.168.14.21 as the new PRIMARY"
+            ;;
+        2)
+            chosen_primary_ip="$STANDBY_IP"
+            chosen_primary_ssh="$STANDBY_SSH_HOST"
+            chosen_standby_ip="$PRIMARY_IP"
+            chosen_standby_ssh="$PRIMARY_SSH_HOST"
+            info "✅ Selected 192.168.14.22 as the new PRIMARY"
+            ;;
+        3)
+            info "Operation cancelled"
+            return 0
+            ;;
+        *)
+            error "Invalid choice"
+            return 1
+            ;;
+    esac
+    
+    read -p "❓ Proceed with split-brain recovery? (yes/NO): " confirm
+    if [[ "$confirm" != "yes" ]]; then
+        info "Split-brain recovery cancelled"
+        return 0
+    fi
+    
+    # Step 1: Fix repmgrd permissions on both nodes
+    info "🔧 Step 1: Fixing repmgrd log permissions on both nodes..."
+    fix_repmgrd_permissions "$chosen_primary_ssh" "chosen primary"
+    fix_repmgrd_permissions "$chosen_standby_ssh" "chosen standby"
+    
+    # Step 2: Stop repmgrd on both nodes
+    info "🔄 Step 2: Stopping repmgrd on both nodes..."
+    ssh $SSH_OPTIONS "$SSH_USER@$chosen_primary_ssh" "sudo systemctl stop repmgrd" 2>/dev/null || true
+    ssh $SSH_OPTIONS "$SSH_USER@$chosen_standby_ssh" "sudo systemctl stop repmgrd" 2>/dev/null || true
+    sleep 3
+    
+    # Step 3: Promote chosen primary
+    info "🔄 Step 3: Promoting chosen primary ($chosen_primary_ip)..."
+    
+    # Remove standby.signal to allow promotion
+    ssh $SSH_OPTIONS "$SSH_USER@$chosen_primary_ssh" "
+        sudo -u postgres rm -f /var/lib/postgresql/17/main/standby.signal
+        sudo -u postgres rm -f /var/lib/postgresql/17/main/recovery.signal
+    " 2>/dev/null
+    
+    # Try multiple promotion methods
+    local promotion_success=false
+    
+    # Method 1: pg_promote()
+    info "Attempting promotion via pg_promote()..."
+    if ssh $SSH_OPTIONS "$SSH_USER@$chosen_primary_ssh" "sudo -u postgres psql -c \"SELECT pg_promote();\"" 2>/dev/null; then
+        success "✅ pg_promote() successful"
+        promotion_success=true
+    else
+        warn "pg_promote() failed, trying repmgr promote..."
+        
+        # Method 2: repmgr promote
+        if ssh $SSH_OPTIONS "$SSH_USER@$chosen_primary_ssh" "sudo -u postgres repmgr -f /etc/repmgr/repmgr.conf standby promote --force" 2>/dev/null; then
+            success "✅ repmgr promote successful"
+            promotion_success=true
+        else
+            warn "repmgr promote failed, trying PostgreSQL restart..."
+            
+            # Method 3: Restart PostgreSQL as primary
+            ssh $SSH_OPTIONS "$SSH_USER@$chosen_primary_ssh" "
+                sudo systemctl stop postgresql
+                sleep 3
+                sudo systemctl start postgresql
+            " 2>/dev/null
+            
+            sleep 10
+            
+            local new_recovery_status
+            new_recovery_status=$(timeout 5 env PGPASSWORD="$PG_SUPER_PASS" psql -h "$chosen_primary_ip" -p "$DB_PORT" -U "$USERNAME" -d "$DATABASE" -Atqc "SELECT pg_is_in_recovery();" 2>/dev/null || echo "UNKNOWN")
+            
+            if [[ "$new_recovery_status" == "f" ]]; then
+                success "✅ PostgreSQL restart promotion successful"
+                promotion_success=true
+            fi
+        fi
+    fi
+    
+    if [[ "$promotion_success" != true ]]; then
+        error "❌ All promotion methods failed"
+        return 1
+    fi
+    
+    sleep 5
+    
+    # Step 4: Verify promotion
+    info "🔍 Step 4: Verifying promotion..."
+    local primary_status
+    primary_status=$(timeout 5 env PGPASSWORD="$PG_SUPER_PASS" psql -h "$chosen_primary_ip" -p "$DB_PORT" -U "$USERNAME" -d "$DATABASE" -Atqc "SELECT CASE WHEN pg_is_in_recovery() THEN 'STANDBY' ELSE 'PRIMARY' END;" 2>/dev/null || echo "UNREACHABLE")
+    
+    if [[ "$primary_status" == "PRIMARY" ]]; then
+        success "✅ Node $chosen_primary_ip is now PRIMARY"
+    else
+        error "❌ Promotion verification failed - node is still $primary_status"
+        return 1
+    fi
+    
+    # Step 5: Create replication slot on new primary
+    info "🔧 Step 5: Creating replication slot on new primary..."
+    ssh $SSH_OPTIONS "$SSH_USER@$chosen_primary_ssh" "sudo -u postgres psql -c \"
+        -- Drop existing slots if they exist
+        SELECT pg_drop_replication_slot(slot_name) 
+        FROM pg_replication_slots 
+        WHERE slot_name IN ('repmgr_slot_1', 'repmgr_slot_2');
+        
+        -- Create fresh replication slot for standby
+        SELECT pg_create_physical_replication_slot('repmgr_slot_2');
+        
+        -- Show created slots
+        SELECT slot_name, slot_type, active FROM pg_replication_slots;
+    \"" 2>/dev/null || warn "Replication slot creation may have failed"
+    
+    # Step 6: Fix the standby node
+    info "🔄 Step 6: Rebuilding standby node ($chosen_standby_ip)..."
+    
+    # Stop PostgreSQL on standby
+    ssh $SSH_OPTIONS "$SSH_USER@$chosen_standby_ssh" "sudo systemctl stop postgresql" 2>/dev/null
+    sleep 3
+    
+    # Clean and rebuild standby
+    ssh $SSH_OPTIONS "$SSH_USER@$chosen_standby_ssh" "
+        # Complete directory removal and recreation
+        sudo rm -rf /var/lib/postgresql/17/main
+        sudo mkdir -p /var/lib/postgresql/17/main
+        sudo chown postgres:postgres /var/lib/postgresql/17/main
+        sudo chmod 700 /var/lib/postgresql/17/main
+    " 2>/dev/null
+    
+    # Clone from new primary
+    info "Cloning standby from new primary..."
+    if ssh $SSH_OPTIONS "$SSH_USER@$chosen_standby_ssh" "
+        sudo -u postgres env PGPASSWORD='$PG_SUPER_PASS' pg_basebackup \\
+            -h $chosen_primary_ip \\
+            -p 5432 \\
+            -U postgres \\
+            -D /var/lib/postgresql/17/main \\
+            -v \\
+            -P \\
+            --no-password \\
+            -X stream \\
+            --checkpoint=fast \\
+            --write-recovery-conf \\
+            -S repmgr_slot_2
+    " 2>&1; then
+        success "✅ Standby cloning successful"
+    else
+        error "❌ Standby cloning failed"
+        return 1
+    fi
+    
+    # Step 7: Start standby PostgreSQL
+    info "🔄 Step 7: Starting standby PostgreSQL..."
+    ssh $SSH_OPTIONS "$SSH_USER@$chosen_standby_ssh" "sudo systemctl start postgresql" 2>/dev/null
+    sleep 10
+    
+    # Step 8: Verify standby status
+    info "🔍 Step 8: Verifying standby status..."
+    local standby_status
+    standby_status=$(timeout 5 env PGPASSWORD="$PG_SUPER_PASS" psql -h "$chosen_standby_ip" -p "$DB_PORT" -U "$USERNAME" -d "$DATABASE" -Atqc "SELECT CASE WHEN pg_is_in_recovery() THEN 'STANDBY' ELSE 'PRIMARY' END;" 2>/dev/null || echo "UNREACHABLE")
+    
+    if [[ "$standby_status" == "STANDBY" ]]; then
+        success "✅ Node $chosen_standby_ip is now STANDBY"
+    else
+        error "❌ Standby verification failed - node is $standby_status"
+        return 1
+    fi
+    
+    # Step 9: Verify replication
+    info "🔍 Step 9: Verifying replication connection..."
+    local repl_wait=0
+    local max_repl_wait=60
+    local replication_established=false
+    
+    while [[ $repl_wait -lt $max_repl_wait ]]; do
+        local repl_count
+        repl_count=$(timeout 5 env PGPASSWORD="$PG_SUPER_PASS" psql -h "$chosen_primary_ip" -p "$DB_PORT" -U "$USERNAME" -d "$DATABASE" -Atqc "SELECT count(*) FROM pg_stat_replication WHERE client_addr = '$chosen_standby_ip';" 2>/dev/null || echo "0")
+        
+        if [[ "$repl_count" -gt 0 ]]; then
+            replication_established=true
+            success "✅ Replication connection established"
+            break
+        fi
+        
+        sleep 3
+        ((repl_wait += 3))
+        if [[ $((repl_wait % 15)) -eq 0 ]]; then
+            info "Still waiting for replication... ($repl_wait/$max_repl_wait seconds)"
+        fi
+    done
+    
+    # Step 10: Re-register with repmgr
+    info "🔄 Step 10: Re-registering nodes with repmgr..."
+    
+    # Register primary
+    ssh $SSH_OPTIONS "$SSH_USER@$chosen_primary_ssh" "sudo -u postgres repmgr -f /etc/repmgr/repmgr.conf primary register --force" 2>/dev/null || warn "Primary registration may have failed"
+    
+    # Register standby
+    ssh $SSH_OPTIONS "$SSH_USER@$chosen_standby_ssh" "sudo -u postgres repmgr -f /etc/repmgr/repmgr.conf standby register --force" 2>/dev/null || warn "Standby registration may have failed"
+    
+    # Step 11: Start repmgrd services
+    info "🔄 Step 11: Starting repmgrd services..."
+    ssh $SSH_OPTIONS "$SSH_USER@$chosen_primary_ssh" "sudo systemctl start repmgrd" 2>/dev/null || warn "Primary repmgrd start may have failed"
+    ssh $SSH_OPTIONS "$SSH_USER@$chosen_standby_ssh" "sudo systemctl start repmgrd" 2>/dev/null || warn "Standby repmgrd start may have failed"
+    
+    sleep 10
+    
+    # Step 12: Final verification
+    info "🎯 Step 12: Final verification..."
+    
+    local final_primary_status final_standby_status
+    final_primary_status=$(timeout 5 env PGPASSWORD="$PG_SUPER_PASS" psql -h "$chosen_primary_ip" -p "$DB_PORT" -U "$USERNAME" -d "$DATABASE" -Atqc "SELECT CASE WHEN pg_is_in_recovery() THEN 'STANDBY' ELSE 'PRIMARY' END;" 2>/dev/null || echo "UNREACHABLE")
+    final_standby_status=$(timeout 5 env PGPASSWORD="$PG_SUPER_PASS" psql -h "$chosen_standby_ip" -p "$DB_PORT" -U "$USERNAME" -d "$DATABASE" -Atqc "SELECT CASE WHEN pg_is_in_recovery() THEN 'STANDBY' ELSE 'PRIMARY' END;" 2>/dev/null || echo "UNREACHABLE")
+    
+    info "Final Status:"
+    info "  • $chosen_primary_ip: $final_primary_status"
+    info "  • $chosen_standby_ip: $final_standby_status"
+    
+    if [[ "$final_primary_status" == "PRIMARY" && "$final_standby_status" == "STANDBY" ]]; then
+        success "🎉 SPLIT-BRAIN RECOVERY SUCCESSFUL!"
+        
+        if [[ "$replication_established" == true ]]; then
+            success "✅ Replication is working"
+            
+            # Show replication details
+            local repl_details
+            repl_details=$(timeout 5 env PGPASSWORD="$PG_SUPER_PASS" psql -h "$chosen_primary_ip" -p "$DB_PORT" -U "$USERNAME" -d "$DATABASE" -c "
+                SELECT 
+                    client_addr,
+                    application_name,
+                    state,
+                    pg_wal_lsn_diff(pg_current_wal_lsn(), replay_lsn) as lag_bytes
+                FROM pg_stat_replication;
+            " 2>/dev/null)
+            
+            info "📊 Replication Status:"
+            echo "$repl_details"
+        else
+            warn "⚠️ Replication may need more time to establish"
+        fi
+        
+        # Show cluster status
+        echo
+        info "📋 Final Cluster Status:"
+        get_cluster_status "$chosen_primary_ssh" "new primary"
+        
+    else
+        error "❌ Split-brain recovery incomplete"
+        error "Expected: PRIMARY and STANDBY, Got: $final_primary_status and $final_standby_status"
+        return 1
+    fi
+    
+    success "✅ Split-brain scenario has been resolved!"
+}
