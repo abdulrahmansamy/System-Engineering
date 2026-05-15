@@ -1,0 +1,15 @@
+# Example sync_on_change configuration file
+# Copy to sync_on_change.conf and edit as needed
+
+# --- Remote Connection ---
+remote_user="youruser"           # SSH username
+remote_host="your.remote.host"  # SSH host or IP
+remote_path="~/scripts/"        # Destination directory
+
+# --- Behavior ---
+interval=3                       # Poll interval (seconds)
+max_failures=10                  # Abort after this many consecutive sync failures
+
+# --- Advanced (optional) ---
+# scp_opts="-C"                  # Extra options for scp
+# ssh_opts="-o BatchMode=yes"    # Extra options for ssh

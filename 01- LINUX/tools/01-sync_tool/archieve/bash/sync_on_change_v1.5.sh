@@ -448,6 +448,63 @@ main_loop() {
 }
 
 
+# ─── Universal PATH Installer ───────────────────────────────
+universal_path_installer() {
+
+  # --- Color Definitions ---
+  local GREEN="\033[1;32m"
+  local YELLOW="\033[1;33m"
+  local BLUE="\033[1;34m"
+  local RED="\033[1;31m"
+  local RESET="\033[0m"
+
+  # --- Resolve Script Path ---
+  local SCRIPT_PATH
+  SCRIPT_PATH="$(realpath "$0")"
+  local SCRIPT_NAME
+  SCRIPT_NAME="$(basename "$SCRIPT_PATH")"
+  local TARGET="/usr/local/bin/$SCRIPT_NAME"
+  local TMP_TARGET="/tmp/${SCRIPT_NAME}.tmp.$$"
+
+  # If already installed, return early
+  if [[ "$SCRIPT_PATH" == "$TARGET" ]]; then
+    echo -e "${GREEN}✔ Already installed in PATH. Enjoy using ${BLUE}$SCRIPT_NAME${RESET}"
+    return 0
+  fi
+
+  echo
+  echo -e "${BLUE}Do you like this tool?${RESET}"
+  local answer
+  read -t 30 -p $'Add it to PATH so you can run it anywhere (y/N): ' answer
+
+  if [[ "$answer" =~ ^[Yy]$ ]]; then
+    echo -e "${YELLOW}Installing $SCRIPT_NAME into /usr/local/bin ...${RESET}"
+
+    # Copy to a temp file first (atomic install)
+    if ! cp "$SCRIPT_PATH" "$TMP_TARGET"; then
+      echo -e "${RED}✖ Failed to copy to temporary location.${RESET}"
+      return 1
+    fi
+
+    chmod +x "$TMP_TARGET"
+
+    # Move into place with sudo
+    if sudo mv "$TMP_TARGET" "$TARGET"; then
+      echo -e "${GREEN}✔ Installed successfully. Run it using: ${BLUE}$SCRIPT_NAME${RESET}"
+    else
+      echo -e "${RED}✖ Installation failed during final move.${RESET}"
+      rm -f "$TMP_TARGET"
+      return 1
+    fi
+
+  else
+    echo -e "${YELLOW}Skipped PATH installation.${RESET}"
+  fi
+}
+
+
+
+
 # ─── Script Entry ─────────────────────────────────────────────────────────────
 
 
@@ -462,6 +519,8 @@ validate_config
 # Determine target type for display
 target_type="file"
 [ -d "$target" ] && target_type="directory"
+
+universal_path_installer
 
 info "Watching $target_type: $target | Remote: ${remote_user}@${remote_host}:${remote_path} | Interval: ${interval}s | Max failures: ${max_failures}"
 print_config_sources
